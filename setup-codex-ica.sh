@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for macOS / Linux
-# Version: 2.0.0
+# Version: 2.1.0
 # ==============================================================================
 
 set -e
@@ -139,7 +139,7 @@ prompt_file_action() {
 }
 
 echo -e "${CYAN}=================================================================${NC}"
-echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool${NC}"
+echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.1.0${NC}"
 echo -e "${CYAN}  macOS / Linux Edition with Dry-Run Preview & Explicit Confirmation${NC}"
 echo -e "${CYAN}=================================================================${NC}"
 

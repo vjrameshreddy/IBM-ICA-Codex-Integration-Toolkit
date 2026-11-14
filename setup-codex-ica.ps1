@@ -1,6 +1,6 @@
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for Windows
-# Version: 2.0.0
+# Version: 2.1.0
 # ==============================================================================
 [CmdletBinding()]
 param(
@@ -120,7 +120,7 @@ function Prompt-FileAction {
 }
 
 Clear-Host
-Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
+Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.1.0" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
 
 # 1. Environment & Path Definitions
 $CodexDir = Join-Path $HOME ".codex"
