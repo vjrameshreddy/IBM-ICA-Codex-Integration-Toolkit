@@ -844,6 +844,24 @@
           <strong>Built-in Safety &amp; Control:</strong> The automation script features an interactive <strong>Dry-Run / Preview mode</strong> and requires <strong>explicit confirmation</strong> before any installation, configuration file merging, secret storage, or background process termination.
         </div>
 
+        <h3 style="margin: 18px 0 10px; font-size: 1.1rem; color: #fff;">Download Standalone Setup Script</h3>
+        <p style="font-size:0.95rem; margin-bottom:12px;">Download the script directly to your computer and run it. Save it in your working folder, then use the commands below.</p>
+
+        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom: 24px;">
+          <a href="setup-codex-ica.ps1" download="setup-codex-ica.ps1" class="btn os-win">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download setup-codex-ica.ps1 (Windows)
+          </a>
+          <a href="setup-codex-ica.sh" download="setup-codex-ica.sh" class="btn os-mac">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download setup-codex-ica.sh (macOS)
+          </a>
+          <a href="ica-models.json" download="ica-models.json" class="btn secondary">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download ica-models.json Catalog
+          </a>
+        </div>
+
         <h3 style="margin: 18px 0 10px; font-size: 1.1rem; color: #fff;">Option A: Preview Actions (Dry-Run Mode)</h3>
         <p style="font-size:0.92rem; color: var(--text-muted); margin-bottom: 8px;">
           Inspect all planned configuration changes, file diffs, and permissions without modifying your machine:
@@ -921,24 +939,6 @@
             <li><strong>Secret Protection:</strong> Backup <code>.env</code> files automatically inherit strict user-only permissions (NTFS owner-only on Windows, <code>chmod 600</code> on Mac).</li>
             <li><strong>Overwrite In-Place:</strong> Overwrites files directly when chosen or when passing <code>-Overwrite</code> / <code>--overwrite</code>.</li>
           </ul>
-        </div>
-
-        <h3 style="margin: 24px 0 10px; font-size: 1.1rem; color: #fff;">Option C: Download Standalone Setup Script</h3>
-        <p style="font-size:0.95rem; margin-bottom:12px;">Download the script directly to your computer and run it:</p>
-
-        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom: 24px;">
-          <a href="setup-codex-ica.ps1" download="setup-codex-ica.ps1" class="btn os-win">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Download setup-codex-ica.ps1 (Windows)
-          </a>
-          <a href="setup-codex-ica.sh" download="setup-codex-ica.sh" class="btn os-mac">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Download setup-codex-ica.sh (macOS)
-          </a>
-          <a href="ica-models.json" download="ica-models.json" class="btn secondary">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Download ica-models.json Catalog
-          </a>
         </div>
 
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 28px 0 20px;">
@@ -1094,10 +1094,6 @@ codex</pre>
             <li><strong>Dry-Run previews only:</strong> <code>-DryRun</code> / <code>--dry-run</code> shows the planned changes without modifying any file.</li>
           </ul>
         </div>
-
-
-
-
 
         <!-- ChatGPT Desktop Manual Install Info -->
         <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
