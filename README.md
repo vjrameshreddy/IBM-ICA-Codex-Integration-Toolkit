@@ -1,6 +1,6 @@
 # IBM ICA (IBM Consulting Advantage) + Codex Integration Toolkit
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-informational.svg)
 
@@ -12,9 +12,9 @@ A comprehensive setup, automation, and guidance toolkit to configure **OpenAI Co
 
 | File | Description |
 | :--- | :--- |
-| [**`index.html`**](index.html) | **Interactive Web Integration Toolkit** (`v2.1.0`) — A visual, step-by-step assistant for non-technical users and developers with an OS toggle, live config generator, and troubleshooting guide. |
-| [**`setup-codex-ica.ps1`**](setup-codex-ica.ps1) | **Windows Automation Script** (`v2.1.0`) — Automated PowerShell setup (directory scaffolding, BOM-free model catalog creation, TOML merging, secure key prompt, and NTFS permissions). |
-| [**`setup-codex-ica.sh`**](setup-codex-ica.sh) | **macOS / Linux Automation Script** (`v2.1.0`) — Automated Shell script (npm global prefix fix, model catalog creation, TOML merging, and `chmod 600`). |
+| [**`index.html`**](index.html) | **Interactive Web Integration Toolkit** (`v2.2.0`) — A visual, step-by-step assistant for non-technical users and developers with an OS toggle, live config generator, and troubleshooting guide. |
+| [**`setup-codex-ica.ps1`**](setup-codex-ica.ps1) | **Windows Automation Script** (`v2.2.0`) — Automated PowerShell setup (directory scaffolding, BOM-free model catalog creation, TOML merging, secure key prompt, and NTFS permissions). |
+| [**`setup-codex-ica.sh`**](setup-codex-ica.sh) | **macOS / Linux Automation Script** (`v2.2.0`) — Automated Shell script (npm global prefix fix, model catalog creation, TOML merging, and `chmod 600`). |
 | [**`ica-models.json`**](ica-models.json) | **ICA Model Catalog** — Complete, valid JSON definition for all 6 ICA models (`gpt-advantage-assist`, `gpt-5.6-sol`, `gpt-5.6-luna`, `gpt-5.6-terra`, `gpt-5.4`, `gpt-5.1`). |
 | [**`RELEASE_NOTES.md`**](RELEASE_NOTES.md) | **Release Notes & Security Assessment** — Complete version history, security vulnerability audit, and filesystem migration records. |
 | [**`plan.md`**](plan.md) | **Architecture & Development Plan** — System architecture, client integration boundaries, and maintenance strategy. |
@@ -25,6 +25,9 @@ A comprehensive setup, automation, and guidance toolkit to configure **OpenAI Co
 ## ⚡ Fast-Track: Automated Installation
 
 > **ℹ️ Prerequisite: install VS Code first.** The script does not install VS Code (IBMers: use `PC@IBM` / `Mac@IBM`). Once VS Code is in place, the script detects and reuses your existing Codex configuration (`~/.codex/config.toml`, `~/.codex/model-catalog/ica-models.json`, `~/.codex/.env`): existing Codex configuration is **preserved and merged** (ICA settings are merged into `config.toml`, other settings are kept, an existing API key can be kept, and the model catalog can be skipped), never overwritten wholesale without your choice. Backups are optional and timestamped, and `-DryRun` / `--dry-run` previews changes without modifying any file.
+
+
+> **ℹ️ ChatGPT Desktop App is not installed by the automated setup.** Installing it requires administrator privileges, so it must be installed manually, where approved by IBM policy (https://chatgpt.com/download/). The script only configures `~/.codex` so the desktop app can inherit the ICA settings once it is installed. The legacy `-InstallChatGPT` / `--install-chatgpt` flag is a deprecated no-op that prints this message.
 
 ### 1. Preview / Dry-Run (No Changes Made)
 Inspect planned changes, file diffs, and directory creations before executing:
@@ -98,7 +101,7 @@ The integration process consists of 5 clear stages:
 | **Step 1** | **Prerequisites** | Verify Node.js, npm, Git, Python, and install Codex CLI (`@openai/codex`). *(IBMers: Install VS Code via `PC@IBM` / `Mac@IBM`)* |
 | **Step 2** | **ICA 2.0 Portal** | Access Essentials Portal and generate a dedicated **Codex Coding Agent API Key**. |
 | **Step 3** | **Configuration** | Deploy `ica-models.json`, update `config.toml`, and store `ICA_API_KEY` securely. |
-| **Step 4** | **Client Setup** | Install VS Code Extension (`OpenAI.chatgpt`) and (optional) ChatGPT Desktop App. *(IBM Workstations: VS Code from `PC@IBM` / `Mac@IBM`)* |
+| **Step 4** | **Client Setup** | Install VS Code Extension (`OpenAI.chatgpt`) and (optional) ChatGPT Desktop App, which must be installed **manually** (requires administrator privileges; not installed by the script). *(IBM Workstations: VS Code from `PC@IBM` / `Mac@IBM`)* |
 | **Step 5** | **Verification & Testing** | Run the 30-second CLI test, VS Code `hello.py` test prompt, and desktop validation. |
 
 ---

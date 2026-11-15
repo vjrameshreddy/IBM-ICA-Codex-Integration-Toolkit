@@ -1,6 +1,6 @@
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for Windows
-# Version: 2.1.0
+# Version: 2.2.0
 # ==============================================================================
 [CmdletBinding()]
 param(
@@ -12,6 +12,7 @@ param(
 
     [switch]$AutoBackup,
     [switch]$Overwrite,
+    # Deprecated no-op (kept so existing automation does not break): ChatGPT Desktop is no longer installed by this script.
     [switch]$InstallChatGPT,
     [switch]$SkipKeyPrompt,
     [switch]$NonInteractive
@@ -120,7 +121,15 @@ function Prompt-FileAction {
 }
 
 Clear-Host
-Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.1.0" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
+Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.2.0" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
+
+Write-Host "[INFO] ChatGPT Desktop App is not installed by the automated setup." -ForegroundColor Cyan
+Write-Host "       Installing it requires administrator privileges, so it must be installed manually," -ForegroundColor Cyan
+Write-Host "       where approved by IBM policy (https://chatgpt.com/download/). This script only configures" -ForegroundColor Cyan
+Write-Host "       ~/.codex so the desktop app can inherit the ICA settings once it is installed." -ForegroundColor Cyan
+if ($InstallChatGPT) {
+    Write-Host "[WARN] The -InstallChatGPT / --install-chatgpt flag is deprecated and ignored: ChatGPT Desktop is no longer installed by this script. Please install it manually (administrator privileges required)." -ForegroundColor Yellow
+}
 
 # 1. Environment & Path Definitions
 $CodexDir = Join-Path $HOME ".codex"
@@ -520,7 +529,7 @@ if (-not $CodexVer) {
 if ($HasChatGPTDesktop) {
     Write-Host "    - ChatGPT App : Desktop app detected (Will inherit ICA config automatically)" -ForegroundColor Gray
 } else {
-    Write-Host "    - ChatGPT App : Not installed (Will offer optional install via winget)" -ForegroundColor Gray
+    Write-Host "    - ChatGPT App : Not installed - NOT installed by this script; install manually (requires administrator privileges)" -ForegroundColor Yellow
 }
 if ($RunningDaemons.Count -gt 0) {
     Write-Host "    - Daemons     : Will terminate $($RunningDaemons.Count) running codex/node_repl processes to reload environment" -ForegroundColor Yellow
@@ -602,33 +611,6 @@ if (-not $CodexVer) {
         }
     } else {
         Write-WarningMsg "npm is not installed. Please install Node.js LTS from https://nodejs.org/ first."
-    }
-}
-
-# ------------------------------------------------------------------------------
-# STEP 1b: Optional ChatGPT Desktop App Installation (with explicit confirmation)
-# ------------------------------------------------------------------------------
-if (-not $HasChatGPTDesktop -and (Get-Command winget -ErrorAction SilentlyContinue)) {
-    $shouldInstall = $false
-    if ($InstallChatGPT) {
-        $shouldInstall = $true
-    } elseif (-not ($Yes -or $NonInteractive -or $AutoBackup -or $Overwrite)) {
-        $shouldInstall = Ask-UserApproval "Would you like to install the official ChatGPT Desktop App via winget?" $false
-    }
-
-    if ($shouldInstall) {
-        Write-Step "Installing ChatGPT Desktop App via winget..."
-        try {
-            & winget install --id OpenAI.ChatGPT -e --accept-package-agreements --accept-source-agreements
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "ChatGPT Desktop App installed successfully."
-                $HasChatGPTDesktop = $true
-            } else {
-                Write-WarningMsg "winget could not complete installation. You can install manually from https://chatgpt.com/download/ if permitted by IBM policy."
-            }
-        } catch {
-            Write-WarningMsg "Could not invoke winget: $_"
-        }
     }
 }
 
@@ -819,4 +801,8 @@ Write-Host " 3. For Visual Studio Code:" -ForegroundColor White
 Write-Host "    - Install 'Codex - OpenAI''s coding agent' (OpenAI.chatgpt) extension." -ForegroundColor Gray
 Write-Host "    - Open folder: `"$TestDir`" and click Trust." -ForegroundColor Gray
 Write-Host "    - Open the Codex tab to start coding with ICA!" -ForegroundColor Gray
+if (-not $HasChatGPTDesktop) {
+    Write-Host " 4. ChatGPT Desktop App (optional): install it manually (requires administrator privileges):" -ForegroundColor White
+    Write-Host "    - https://chatgpt.com/download/ (only where approved by IBM policy)" -ForegroundColor Gray
+}
 Write-Host "=================================================================`n" -ForegroundColor Green

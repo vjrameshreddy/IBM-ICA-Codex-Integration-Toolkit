@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for macOS / Linux
-# Version: 2.1.0
+# Version: 2.2.0
 # ==============================================================================
 
 set -e
@@ -10,6 +10,7 @@ DRY_RUN=false
 ASSUME_YES=false
 AUTO_BACKUP=false
 OVERWRITE=false
+# Deprecated no-op (kept so existing automation does not break): ChatGPT Desktop is no longer installed by this script.
 INSTALL_CHATGPT=false
 SKIP_KEY_PROMPT=false
 
@@ -139,9 +140,17 @@ prompt_file_action() {
 }
 
 echo -e "${CYAN}=================================================================${NC}"
-echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.1.0${NC}"
+echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.2.0${NC}"
 echo -e "${CYAN}  macOS / Linux Edition with Dry-Run Preview & Explicit Confirmation${NC}"
 echo -e "${CYAN}=================================================================${NC}"
+
+echo -e "${CYAN}[INFO] ChatGPT Desktop App is not installed by the automated setup.${NC}"
+echo -e "${CYAN}       Installing it requires administrator privileges, so it must be installed manually,${NC}"
+echo -e "${CYAN}       where approved by IBM policy (https://chatgpt.com/download/). This script only configures${NC}"
+echo -e "${CYAN}       ~/.codex so the desktop app can inherit the ICA settings once it is installed.${NC}"
+if [ "$INSTALL_CHATGPT" = true ]; then
+    echo -e "${YELLOW}[WARN] The -InstallChatGPT / --install-chatgpt flag is deprecated and ignored: ChatGPT Desktop is no longer installed by this script. Please install it manually (administrator privileges required).${NC}"
+fi
 
 CODEX_DIR="$HOME/.codex"
 MODEL_CATALOG_DIR="$CODEX_DIR/model-catalog"
@@ -229,7 +238,7 @@ fi
 if [ "$has_chatgpt_app" = true ]; then
     echo -e "    - ChatGPT App : Desktop app detected (Will inherit ICA config automatically)"
 else
-    echo -e "    - ChatGPT App : Not installed (Will offer optional install via brew)"
+    echo -e "    - ChatGPT App : Not installed - NOT installed by this script; install manually (requires administrator privileges)"
 fi
 echo -e "${YELLOW}+---------------------------------------------------------------+${NC}\n"
 
@@ -288,23 +297,6 @@ if ! command -v codex >/dev/null 2>&1; then
             npm install -g @openai/codex
             export PATH="$(npm config get prefix)/bin:$PATH"
         fi
-    fi
-fi
-
-# 4b. Optional ChatGPT Desktop App Installation via brew
-if [ "$has_chatgpt_app" = false ] && command -v brew >/dev/null 2>&1; then
-    should_install=false
-    if [ "$INSTALL_CHATGPT" = true ]; then
-        should_install=true
-    elif [ "$ASSUME_YES" = false ] && [ "$AUTO_BACKUP" = false ] && [ "$OVERWRITE" = false ]; then
-        if ask_approval "Would you like to install the official ChatGPT Desktop App via brew?" false; then
-            should_install=true
-        fi
-    fi
-
-    if [ "$should_install" = true ]; then
-        echo "Running: brew install --cask chatgpt"
-        brew install --cask chatgpt || echo -e " ${YELLOW}[WARN]${NC} brew install failed. You can install manually from https://chatgpt.com/download/ if permitted by IBM policy."
     fi
 fi
 
@@ -664,4 +656,8 @@ echo -e "${YELLOW}Next Steps to Verify:${NC}"
 echo " 1. Restart your terminal session or run: source ~/.zshrc"
 echo " 2. cd \"$TEST_DIR\" && codex"
 echo " 3. Inside Codex, verify with: /status"
+if [ "$has_chatgpt_app" = false ]; then
+    echo " 4. ChatGPT Desktop App (optional): install it manually (requires administrator privileges):"
+    echo "    - https://chatgpt.com/download/ (only where approved by IBM policy)"
+fi
 echo -e "${GREEN}=================================================================${NC}\n"

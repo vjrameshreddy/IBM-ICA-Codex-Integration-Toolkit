@@ -728,7 +728,7 @@
     <div class="badge-bar">
       <span class="badge ibm">IBM Consulting</span>
       <span class="badge ica">ICA 2.0 Integration</span>
-      <span class="badge guide">v2.1.0</span>
+      <span class="badge guide">v2.2.0</span>
       <span class="badge guide">Integration Toolkit</span>
     </div>
     <h1>IBM ICA (IBM Consulting Advantage) + Codex Integration Toolkit</h1>
@@ -829,6 +829,15 @@
           </ul>
         </div>
 
+
+
+        <!-- ChatGPT Desktop Manual Install Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ ChatGPT Desktop App is not installed by the automated setup.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            Installing it requires administrator privileges, so it must be installed manually, where approved by IBM policy (<a href="https://chatgpt.com/download/" target="_blank" style="color: #79c0ff;">https://chatgpt.com/download/</a>). The script only configures <code>~/.codex</code> so the desktop app can inherit the ICA settings once it is installed.
+          </p>
+        </div>
 
 
         <div class="callout success">
@@ -1090,6 +1099,15 @@ codex</pre>
 
 
 
+        <!-- ChatGPT Desktop Manual Install Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ ChatGPT Desktop App is not installed by the automated setup.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            Installing it requires administrator privileges, so it must be installed manually, where approved by IBM policy (<a href="https://chatgpt.com/download/" target="_blank" style="color: #79c0ff;">https://chatgpt.com/download/</a>). The script only configures <code>~/.codex</code> so the desktop app can inherit the ICA settings once it is installed.
+          </p>
+        </div>
+
+
         <h3 style="font-size: 1.05rem; margin-bottom: 12px; color: #fff;">1.1 Quick Verification Commands</h3>
         <p style="font-size:0.95rem; margin-bottom:10px;">Run these commands in your <span class="os-win">PowerShell</span><span class="os-mac">Terminal</span> to see what is already installed:</p>
 
@@ -1348,6 +1366,14 @@ codex --version</pre>
 
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0 20px;">
 
+        <!-- ChatGPT Desktop Manual Install Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ ChatGPT Desktop App is not installed by the automated setup.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            Installing it requires administrator privileges, so it must be installed manually, where approved by IBM policy (<a href="https://chatgpt.com/download/" target="_blank" style="color: #79c0ff;">https://chatgpt.com/download/</a>). The script only configures <code>~/.codex</code> so the desktop app can inherit the ICA settings once it is installed.
+          </p>
+        </div>
+
         <!-- Section 3: ChatGPT Desktop App Integration -->
         <h3 style="font-size: 1.15rem; color: #56c8ff; margin: 10px 0 10px; display: flex; align-items: center; gap: 8px;">
           🖥️ 4.2 ChatGPT Desktop App Integration (Section 3 of Guide)
@@ -1369,11 +1395,11 @@ codex --version</pre>
           <li>
             <strong>Install the ChatGPT Desktop App:</strong>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">
-              The automated script will offer to install this for you, or you can install via package manager:
+              The automated script does <strong>not</strong> install this app. It must be installed manually. Installing via a package manager <strong>requires administrator privileges</strong>:
             </p>
             <div class="code-container">
               <div class="code-header">
-                <span><span class="os-win">PowerShell (winget)</span><span class="os-mac">Terminal (brew)</span></span>
+                <span><span class="os-win">PowerShell (winget) &mdash; Requires administrator privileges</span><span class="os-mac">Terminal (brew) &mdash; Requires administrator privileges</span></span>
                 <button class="copy-btn" onclick="copyCode('chatgpt-install-cmd')">📋 Copy</button>
               </div>
               <pre id="chatgpt-install-cmd" class="os-win">winget install --id OpenAI.ChatGPT -e</pre>

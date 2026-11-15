@@ -4,6 +4,16 @@ All notable changes, architectural updates, security assessments, and configurat
 
 ---
 
+## [2.2.0] — 2026-11-15
+
+### 🔄 Changed
+- **ChatGPT Desktop is no longer installed by the setup scripts** (it requires administrator privileges and must be installed manually, where approved by IBM policy). The winget (`OpenAI.ChatGPT`) and `brew install --cask chatgpt` steps were removed from `setup-codex-ica.ps1` and `setup-codex-ica.sh`.
+- **Deprecated no-op flags**: `-InstallChatGPT` / `--install-chatgpt` are still accepted so existing automation does not break. They install nothing and print the same deprecation message in both scripts.
+- **Informational banner** "ChatGPT Desktop App is not installed by the automated setup" added to the Fast-Track, Step 1 and Step 4 tabs of `index.html`, the README, and the scripts (startup message, Planned Actions preview and Next Steps).
+- `index.html` Step 4.2: the `winget` / `brew` commands are kept as manual options and labelled "Requires administrator privileges".
+
+---
+
 ## [2.1.0] — 2026-11-14
 
 ### 🚀 Features Added & Enhanced
