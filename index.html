@@ -728,7 +728,7 @@
     <div class="badge-bar">
       <span class="badge ibm">IBM Consulting</span>
       <span class="badge ica">ICA 2.0 Integration</span>
-      <span class="badge guide">v2.0.0</span>
+      <span class="badge guide">v2.1.0</span>
       <span class="badge guide">Integration Toolkit</span>
     </div>
     <h1>IBM ICA (IBM Consulting Advantage) + Codex Integration Toolkit</h1>
@@ -815,6 +815,20 @@
             For all IBM-managed laptops and workstations, <strong>Visual Studio Code</strong> MUST be installed through the official internal software catalog (<span class="os-win"><strong>PC@IBM</strong></span><span class="os-mac"><strong>Mac@IBM</strong></span>) to comply with IBM corporate IT security policies and receive managed security updates.
           </p>
         </div>
+
+        <!-- Existing Configuration Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ Prerequisite: install VS Code first &mdash; existing Codex configuration is preserved and merged.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            The script does <strong>not</strong> install VS Code. Once VS Code is already in place, it detects and reuses your existing Codex configuration files (<code>~/.codex/config.toml</code>, <code>~/.codex/model-catalog/ica-models.json</code> and the <code>ICA_API_KEY</code> in <code>~/.codex/.env</code>) instead of creating a new setup.
+          </p>
+          <ul style="margin: 8px 0 0 20px; font-size: 0.92rem; color: var(--text-main);">
+            <li><strong>Preserved and merged:</strong> the ICA settings are merged into your existing <code>config.toml</code>; your other settings (<code>[plugins]</code>, <code>[mcp_servers]</code>, etc.) are preserved. An existing <code>ICA_API_KEY</code> can be kept as-is. The model catalog (<code>ica-models.json</code>) is refreshed with the ICA models, and you can skip it. Nothing is overwritten wholesale without your choice.</li>
+            <li><strong>Backup is optional and timestamped:</strong> for each existing file you can choose Auto-Backup (<code>*.bak.yyyyMMdd_HHmmss</code>), overwrite in place, or skip.</li>
+            <li><strong>Dry-Run previews only:</strong> <code>-DryRun</code> / <code>--dry-run</code> shows the planned changes without modifying any file.</li>
+          </ul>
+        </div>
+
 
 
         <div class="callout success">
@@ -1059,6 +1073,20 @@ codex</pre>
             For all IBM-managed laptops and workstations, <strong>Visual Studio Code</strong> MUST be installed through the official internal software catalog (<span class="os-win"><strong>PC@IBM</strong></span><span class="os-mac"><strong>Mac@IBM</strong></span>) to comply with IBM corporate IT security policies and receive managed security updates.
           </p>
         </div>
+        <!-- Existing Configuration Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ Prerequisite: install VS Code first &mdash; existing Codex configuration is preserved and merged.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            The script does <strong>not</strong> install VS Code. Once VS Code is already in place, it detects and reuses your existing Codex configuration files (<code>~/.codex/config.toml</code>, <code>~/.codex/model-catalog/ica-models.json</code> and the <code>ICA_API_KEY</code> in <code>~/.codex/.env</code>) instead of creating a new setup.
+          </p>
+          <ul style="margin: 8px 0 0 20px; font-size: 0.92rem; color: var(--text-main);">
+            <li><strong>Preserved and merged:</strong> the ICA settings are merged into your existing <code>config.toml</code>; your other settings (<code>[plugins]</code>, <code>[mcp_servers]</code>, etc.) are preserved. An existing <code>ICA_API_KEY</code> can be kept as-is. The model catalog (<code>ica-models.json</code>) is refreshed with the ICA models, and you can skip it. Nothing is overwritten wholesale without your choice.</li>
+            <li><strong>Backup is optional and timestamped:</strong> for each existing file you can choose Auto-Backup (<code>*.bak.yyyyMMdd_HHmmss</code>), overwrite in place, or skip.</li>
+            <li><strong>Dry-Run previews only:</strong> <code>-DryRun</code> / <code>--dry-run</code> shows the planned changes without modifying any file.</li>
+          </ul>
+        </div>
+
+
 
 
 
@@ -1294,6 +1322,20 @@ codex --version</pre>
             For all IBM-managed laptops and workstations, <strong>Visual Studio Code</strong> MUST be installed through the official internal software catalog (<span class="os-win"><strong>PC@IBM</strong></span><span class="os-mac"><strong>Mac@IBM</strong></span>) to comply with IBM corporate IT security policies and receive managed security updates.
           </p>
         </div>
+        <!-- Existing Configuration Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ Prerequisite: install VS Code first &mdash; existing Codex configuration is preserved and merged.</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            The script does <strong>not</strong> install VS Code. Once VS Code is already in place, it detects and reuses your existing Codex configuration files (<code>~/.codex/config.toml</code>, <code>~/.codex/model-catalog/ica-models.json</code> and the <code>ICA_API_KEY</code> in <code>~/.codex/.env</code>) instead of creating a new setup.
+          </p>
+          <ul style="margin: 8px 0 0 20px; font-size: 0.92rem; color: var(--text-main);">
+            <li><strong>Preserved and merged:</strong> the ICA settings are merged into your existing <code>config.toml</code>; your other settings (<code>[plugins]</code>, <code>[mcp_servers]</code>, etc.) are preserved. An existing <code>ICA_API_KEY</code> can be kept as-is. The model catalog (<code>ica-models.json</code>) is refreshed with the ICA models, and you can skip it. Nothing is overwritten wholesale without your choice.</li>
+            <li><strong>Backup is optional and timestamped:</strong> for each existing file you can choose Auto-Backup (<code>*.bak.yyyyMMdd_HHmmss</code>), overwrite in place, or skip.</li>
+            <li><strong>Dry-Run previews only:</strong> <code>-DryRun</code> / <code>--dry-run</code> shows the planned changes without modifying any file.</li>
+          </ul>
+        </div>
+
+
 
         <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 10px;">4.1 Visual Studio Code Extension Setup</h3>
         <ol style="margin-left: 20px; font-size: 0.95rem; display: flex; flex-direction: column; gap: 10px;">

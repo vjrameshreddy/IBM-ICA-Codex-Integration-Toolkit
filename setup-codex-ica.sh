@@ -203,6 +203,7 @@ echo -e "    - Model Catalog Folder : $MODEL_CATALOG_DIR $([ "$has_catalog" = tr
 echo -e "    - Test Workspace Folder: $TEST_DIR $([ "$has_testdir" = true ] && echo '[Exists]' || echo '[Will Create]')"
 
 echo -e "\n${WHITE} 2. Configuration Files:${NC}"
+echo -e "    - Note: Existing Codex configuration is preserved and merged: ICA settings are merged into config.toml, an existing API key can be kept, and each existing file can be backed up (timestamped, optional) or skipped. VS Code is not installed by this script."
 echo -e "    - Model Catalog ($CATALOG_JSON_FILE):"
 echo -e "      Will write 6 ICA models (gpt-advantage-assist, gpt-5.6-sol, etc.) in UTF-8.$([ "$has_catalog" = true ] && echo ' [Auto-Backup offered]')"
 echo -e "    - Codex Config ($CONFIG_FILE):"

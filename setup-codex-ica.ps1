@@ -493,6 +493,7 @@ Write-Host "    - Model Catalog Folder : $ModelCatalogDir $(if ($HasCatalog) { '
 Write-Host "    - Test Workspace Folder: $TestDir $(if ($HasTestDir) { '[Exists]' } else { '[Will Create]' })" -ForegroundColor Gray
 
 Write-Host "`n 2. Configuration Files:" -ForegroundColor White
+Write-Host "    - Note: Existing Codex configuration is preserved and merged: ICA settings are merged into config.toml, an existing API key can be kept, and each existing file can be backed up (timestamped, optional) or skipped. VS Code is not installed by this script." -ForegroundColor DarkGray
 Write-Host "    - Model Catalog ($CatalogJsonFile):" -ForegroundColor Gray
 Write-Host "      Will write 6 ICA models (gpt-advantage-assist, gpt-5.6-sol, etc.) in UTF-8 without BOM.$(if ($HasCatalog) { ' [Auto-Backup offered]' })" -ForegroundColor DarkGray
 Write-Host "    - Codex Config ($ConfigFile):" -ForegroundColor Gray

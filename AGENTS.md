@@ -12,6 +12,7 @@ This file provides guidance to agents when working with code in this repository.
 - **ChatGPT Desktop App Shared Scope**: The desktop app reads `~/.codex/config.toml` directly. Do not mix personal ChatGPT accounts with the work `~/.codex` profile.
 - **Standalone Web Architecture**: `index.html` is zero-dependency (no external CDNs/fonts/scripts) to work completely offline in air-gapped or restricted IBM intranet environments.
 - **IBM Enterprise Workstation Banner**: `index.html` repeats the same "🏢 IBM Enterprise Workstation Requirement (PC@IBM / Mac@IBM)" callout in three tabs: Fast-Track (`tab-auto`), Step 1 (`tab-prereqs`), and Step 4 (`tab-clients`). Keep the three copies identical when editing.
+- **Existing Configuration Info Banner**: The "ℹ️ Prerequisite: install VS Code first — existing Codex configuration is preserved and merged" callout (`<!-- Existing Configuration Info -->`) is likewise repeated in the same three tabs. Its claims must match script behavior: `config.toml` is merged, `.env` key can be kept, `ica-models.json` is rewritten (backup/skip offered).
 - **Script Flag Parity**: `setup-codex-ica.ps1` (`-DryRun -Yes -AutoBackup -Overwrite -InstallChatGPT -SkipKeyPrompt -NonInteractive`) and `setup-codex-ica.sh` (`--dry-run --yes --auto-backup --overwrite --install-chatgpt --skip-key-prompt`) must stay in sync. There is no automated test suite; validate with the dry-run and syntax commands below.
 
 ## Essential Commands

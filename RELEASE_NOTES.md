@@ -10,6 +10,7 @@ All notable changes, architectural updates, security assessments, and configurat
 - **Automatic Prerequisite Installation**: `setup-codex-ica.ps1` (winget: `Git.Git`, `OpenJS.NodeJS.LTS`, `Python.Python.3.14`) and `setup-codex-ica.sh` (Homebrew: `git`, `node`, `python`) now offer to install missing Git, Node.js/npm and Python, with confirmation and Dry-Run preview. Windows reloads `PATH` afterwards so Codex CLI installs in the same run. VS Code is never installed by the scripts (use `PC@IBM` / `Mac@IBM`).
 - **Script Version Banner**: Both scripts print their version at startup to identify outdated copies.
 - **IBM Enterprise Workstation Banner**: Now shown on the Fast-Track and Step 1 tabs of `index.html` (previously Step 4 only).
+- **Existing Configuration Info Banner**: New "Prerequisite: install VS Code first — existing Codex configuration is preserved and merged" callout on the Fast-Track, Step 1 and Step 4 tabs of `index.html`, a matching note in `README.md`, and a note line in the scripts' Planned Actions preview (also shown by Dry-Run).
 
 ---
 
