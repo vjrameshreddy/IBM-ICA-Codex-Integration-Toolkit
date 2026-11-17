@@ -192,6 +192,50 @@ Apply restricted owner-only permissions:
 
 ---
 
+## 🔎 Optional: Codex Security Scans with ICA (Windows)
+
+[`codex-security-ica.ps1`](codex-security-ica.ps1) runs `codex-security scan` against ICA instead of OpenAI.
+
+### How `codex-security` differs from `codex`
+
+- `codex-security` uses its **own Codex home** (`~/.codex/state/plugins/codex-security/codex-home`), not `~/.codex`.
+- It **does not inherit the provider configuration** from `~/.codex/config.toml`. A plain `codex-security scan` therefore falls back to stored credentials and OpenAI (web login), even though `codex` itself works with ICA.
+- **Explicit `--codex` provider overrides are required** to select ICA (provider name, `base_url`, `wire_api`, `env_key`). The wrapper passes them for you.
+- With those overrides, **both automatic authentication and `--auth api-key` resolve to `ICA_API_KEY`** (confirmed with `--dry-run`: `method: api_key`, `source: ICA_API_KEY`, `modelProvider: ica`). The wrapper uses `--auth api-key` so it never falls back to a web login.
+- Do not set `CODEX_SECURITY_STATE_DIR` or copy the ICA key into `OPENAI_API_KEY` (it would be sent to OpenAI). `ICA_API_KEY` and `.env` are used as-is.
+
+### Usage
+
+```powershell
+# Preview only: validates inputs and shows the resolved authentication, sends no repository content
+.\codex-security-ica.ps1 -DryRun
+
+# Scan another folder: pass it as the repository (first argument)
+.\codex-security-ica.ps1 C:\path\to\repo
+
+# Scan selected sub-folders of a repository, or changes against a branch
+.\codex-security-ica.ps1 . -Path src,tests
+.\codex-security-ica.ps1 -Diff origin/main
+```
+
+`-Path` only narrows a scan *inside* the repository; a path outside it is rejected with a hint. To scan another folder, pass that folder as the repository instead.
+
+- Requires `npm install --global @openai/codex-security@latest` and `ICA_API_KEY` (set by the setup script). The key is read from the environment only and is never printed.
+- A real scan sends repository content to the ICA endpoint. Confirm this is allowed for the repository before scanning.
+
+### Known limitation (Windows): authentication success is not scan success
+
+Authentication and the Windows sandbox are **two separate problems**. The overrides above fix authentication only. On the machine this was tested on, real scans still stopped at "building threat model", before any model call, with:
+
+```
+failed to prepare Windows sandbox ... orchestrator_helper_exit_nonzero: setup helper exited with status Some(1)
+```
+
+- `-DryRun` is unaffected, and a plain `codex exec` through ICA works.
+- A scan completing end-to-end through ICA was **not verified**. The sandbox failure is a separate issue and is not addressed by this script.
+
+---
+
 ## ❓ Troubleshooting & Diagnostics
 
 | Symptom / Error | Root Cause | Solution |
