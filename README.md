@@ -98,7 +98,7 @@ The integration process consists of 5 clear stages:
 
 | Step | Stage | Description |
 |:---:|:---|:---|
-| **Step 1** | **Prerequisites** | Verify Node.js, npm, Git, Python, and install Codex CLI (`@openai/codex`). *(IBMers: Install VS Code via `PC@IBM` / `Mac@IBM`)* |
+| **Step 1** | **Prerequisites** | Verify Node.js, npm, Git, GitHub CLI (`gh`), Python, and install Codex CLI (`@openai/codex`). *(IBMers: Install VS Code via `PC@IBM` / `Mac@IBM`)* |
 | **Step 2** | **ICA 2.0 Portal** | Access Essentials Portal and generate a dedicated **Codex Coding Agent API Key**. |
 | **Step 3** | **Configuration** | Deploy `ica-models.json`, update `config.toml`, and store `ICA_API_KEY` securely. |
 | **Step 4** | **Client Setup** | Install VS Code Extension (`OpenAI.chatgpt`) and (optional) ChatGPT Desktop App, which must be installed **manually** (requires administrator privileges; not installed by the script). *(IBM Workstations: VS Code from `PC@IBM` / `Mac@IBM`)* |
@@ -114,15 +114,15 @@ Open PowerShell or Terminal and run:
 - **Windows (PowerShell)**:
   ```powershell
   $env:ICA_API_KEY = [System.Environment]::GetEnvironmentVariable('ICA_API_KEY', 'User')
-  New-Item -ItemType Directory -Force "$HOME\codex-ica-test" | Out-Null
-  cd "$HOME\codex-ica-test"
+  New-Item -ItemType Directory -Force "$HOME\IBM ICA-Codex-Integration-Toolkit" | Out-Null
+  cd "$HOME\IBM ICA-Codex-Integration-Toolkit"
   codex
   ```
 
 - **macOS / Linux (Terminal)**:
   ```bash
-  mkdir -p ~/codex-ica-test
-  cd ~/codex-ica-test
+  mkdir -p "$HOME/IBM ICA-Codex-Integration-Toolkit"
+  cd "$HOME/IBM ICA-Codex-Integration-Toolkit"
   codex
   ```
 1. Type `/status` &rarr; verify **`provider: ica`** and **`model: gpt-advantage-assist`**.
@@ -133,7 +133,7 @@ Open PowerShell or Terminal and run:
 3. Type `/exit` to close.
 
 #### 5.2 VS Code Coding Agent Validation
-1. Open **Visual Studio Code** on `~/codex-ica-test`.
+1. Open **Visual Studio Code** on `~/IBM ICA-Codex-Integration-Toolkit`.
 2. Open the **Codex icon** in the left Activity Bar.
 3. Run the coding verification prompt:
    ```text
@@ -142,7 +142,7 @@ Open PowerShell or Terminal and run:
 4. Verify by running: `python hello.py`.
 
 #### 5.3 ChatGPT Desktop App Integration
-1. Open a Codex conversation in the desktop app on your `~/codex-ica-test` workspace.
+1. Open a Codex conversation in the desktop app on your `~/IBM ICA-Codex-Integration-Toolkit` workspace.
 2. Send test prompt: `Say hello in one sentence. Do not create or modify any files.`
 3. A successful response confirms the desktop app is using ICA credentials.
 
@@ -243,6 +243,30 @@ failed to prepare Windows sandbox ... orchestrator_helper_exit_nonzero: setup he
 
 - `-DryRun` is unaffected, and a plain `codex exec` through ICA works.
 - A scan completing end-to-end through ICA was **not verified**. The sandbox failure is a separate issue and is not addressed by this script.
+
+---
+
+## 🧹 Uninstallation & Fresh Reinstall
+
+If you need to perform a clean reinstall, reset misconfigured settings, or completely remove Codex CLI and ICA configuration, run the automated uninstaller. It prompts for explicit user confirmation before taking any action and offers an automatic backup of your existing `~/.codex` directory.
+
+```powershell
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File .\uninstall-codex-ica.ps1
+
+# Options:
+# -DryRun       : Preview actions without modifying any files
+# -KeepConfig   : Remove CLI packages and processes, but preserve ~/.codex
+# -KeepApiKey   : Preserve ICA_API_KEY in User environment variables
+# -Yes          : Assume yes for non-interactive execution
+```
+
+```bash
+# macOS / Linux (Bash)
+./uninstall-codex-ica.sh
+
+# Options: --dry-run, --keep-config, --keep-api-key, --yes
+```
 
 ---
 

@@ -979,11 +979,11 @@
               <button class="copy-btn" onclick="copyCode('auto-post-test-cmds')">📋 Copy Command</button>
             </div>
             <pre id="auto-post-test-cmds" class="os-win">$env:ICA_API_KEY = [System.Environment]::GetEnvironmentVariable('ICA_API_KEY', 'User')
-New-Item -ItemType Directory -Force "$HOME\codex-ica-test" | Out-Null
-cd "$HOME\codex-ica-test"
+New-Item -ItemType Directory -Force "$HOME\IBM ICA-Codex-Integration-Toolkit" | Out-Null
+cd "$HOME\IBM ICA-Codex-Integration-Toolkit"
 codex</pre>
-            <pre id="auto-post-test-cmds-mac" class="os-mac" style="display:none;">mkdir -p ~/codex-ica-test
-cd ~/codex-ica-test
+            <pre id="auto-post-test-cmds-mac" class="os-mac" style="display:none;">mkdir -p "$HOME/IBM ICA-Codex-Integration-Toolkit"
+cd "$HOME/IBM ICA-Codex-Integration-Toolkit"
 codex</pre>
           </div>
 
@@ -1020,7 +1020,7 @@ codex</pre>
           <ol style="margin-left: 20px; font-size: 0.92rem; display: flex; flex-direction: column; gap: 8px;">
             <li>Open <strong>Visual Studio Code</strong>.</li>
             <li>Press <span class="tag-hotkey"><span class="os-win">Ctrl+Shift+X</span><span class="os-mac">Cmd+Shift+X</span></span>, search for <code>Codex</code>, and install <strong>"Codex - OpenAI's coding agent"</strong> (ID: <code>OpenAI.chatgpt</code>).</li>
-            <li>Go to <strong>File &gt; Open Folder</strong> and open <code>~/codex-ica-test</code> (<span class="os-win"><code>C:\Users\&lt;user&gt;\codex-ica-test</code></span>). Click <strong>"Trust this folder"</strong>.</li>
+            <li>Go to <strong>File &gt; Open Folder</strong> and open <code>~/IBM ICA-Codex-Integration-Toolkit</code> (<span class="os-win"><code>C:\Users\&lt;user&gt;\IBM ICA-Codex-Integration-Toolkit</code></span>). Click <strong>"Trust this folder"</strong>.</li>
             <li>Click the <strong>Codex icon</strong> in the left sidebar and send the validation prompt:</li>
           </ol>
 
@@ -1054,7 +1054,7 @@ codex</pre>
 
           <ol style="margin-left: 20px; font-size: 0.92rem; display: flex; flex-direction: column; gap: 8px;">
             <li>Restart the desktop app (<span class="os-win">Quit from taskbar tray</span><span class="os-mac">Cmd+Q</span>).</li>
-            <li>Open a Codex chat session on workspace folder <code>~/codex-ica-test</code>.</li>
+            <li>Open a Codex chat session on workspace folder <code>~/IBM ICA-Codex-Integration-Toolkit</code>.</li>
             <li>Send the desktop test prompt:</li>
           </ol>
 
@@ -1127,12 +1127,14 @@ codex</pre>
           <pre id="verify-cmds" class="os-win">node -v
 npm -v
 git --version
+gh --version
 python --version
 code --version
 codex --version</pre>
           <pre id="verify-cmds-mac" class="os-mac" style="display:none;">node -v
 npm -v
 git --version
+gh --version
 python3 --version
 code --version
 codex --version</pre>
@@ -1158,6 +1160,18 @@ codex --version</pre>
                   </span>
                   <span class="os-mac">
                     Run <code>git --version</code> in Terminal; click <strong>Install</strong> on the Xcode command line prompt.
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>GitHub CLI (<code>gh</code>)</strong></td>
+                <td>GitHub authentication & automation</td>
+                <td>
+                  <span class="os-win">
+                    <a href="https://cli.github.com/" target="_blank" style="color:#79c0ff;">GitHub CLI for Windows</a> or run: <code>winget install --id GitHub.cli -e</code>
+                  </span>
+                  <span class="os-mac">
+                    Run <code>brew install gh</code> or download from <a href="https://cli.github.com/" target="_blank" style="color:#79c0ff;">cli.github.com</a>.
                   </span>
                 </td>
               </tr>
@@ -1374,7 +1388,7 @@ codex --version</pre>
         <ol style="margin-left: 20px; font-size: 0.95rem; display: flex; flex-direction: column; gap: 10px;">
           <li>Open VS Code (<span class="tag-hotkey"><span class="os-win">Ctrl+Shift+X</span><span class="os-mac">Cmd+Shift+X</span></span>) and search for <strong>Codex</strong>.</li>
           <li>Install <strong>"Codex - OpenAI's coding agent"</strong> (Publisher: OpenAI, ID: <code>OpenAI.chatgpt</code>).</li>
-          <li>Open your test project folder: <code>~/codex-ica-test</code> (<span class="os-win"><code>C:\Users\&lt;user&gt;\codex-ica-test</code></span>) via <strong>File &gt; Open Folder</strong>.</li>
+          <li>Open your test project folder: <code>~/IBM ICA-Codex-Integration-Toolkit</code> (<span class="os-win"><code>C:\Users\&lt;user&gt;\IBM ICA-Codex-Integration-Toolkit</code></span>) via <strong>File &gt; Open Folder</strong>.</li>
           <li>When prompted with Restricted Mode, select <strong>"Trust this folder only"</strong>.</li>
           <li>The Codex icon will appear in the left Activity Bar ready for use!</li>
         </ol>
@@ -1466,11 +1480,11 @@ codex --version</pre>
             <button class="copy-btn" onclick="copyCode('cli-test-cmd')">📋 Copy</button>
           </div>
           <pre id="cli-test-cmd" class="os-win">$env:ICA_API_KEY = [System.Environment]::GetEnvironmentVariable('ICA_API_KEY', 'User')
-New-Item -ItemType Directory -Force "$HOME\codex-ica-test" | Out-Null
-cd "$HOME\codex-ica-test"
+New-Item -ItemType Directory -Force "$HOME\IBM ICA-Codex-Integration-Toolkit" | Out-Null
+cd "$HOME\IBM ICA-Codex-Integration-Toolkit"
 codex</pre>
-          <pre id="cli-test-cmd-mac" class="os-mac" style="display:none;">mkdir -p ~/codex-ica-test
-cd ~/codex-ica-test
+          <pre id="cli-test-cmd-mac" class="os-mac" style="display:none;">mkdir -p "$HOME/IBM ICA-Codex-Integration-Toolkit"
+cd "$HOME/IBM ICA-Codex-Integration-Toolkit"
 codex</pre>
         </div>
 
@@ -1497,7 +1511,7 @@ codex</pre>
 
         <h3 style="font-size: 1.1rem; color: #fff; margin: 24px 0 10px;">5.2 VS Code Coding Agent Validation</h3>
         <ol style="margin-left: 20px; font-size: 0.95rem; display: flex; flex-direction: column; gap: 8px;">
-          <li>In VS Code, open the Codex panel in the sidebar on <code>~/codex-ica-test</code>.</li>
+          <li>In VS Code, open the Codex panel in the sidebar on <code>~/IBM ICA-Codex-Integration-Toolkit</code>.</li>
           <li>Paste and run the following coding verification prompt:</li>
         </ol>
 
@@ -1522,7 +1536,7 @@ codex</pre>
 
         <h3 style="font-size: 1.1rem; color: #fff; margin: 24px 0 10px;">5.3 ChatGPT Desktop App Verification</h3>
         <p style="font-size: 0.95rem; margin-bottom: 8px;">
-          Open a Codex chat in the desktop app on your test workspace folder (<code>~/codex-ica-test</code>) and send:
+          Open a Codex chat in the desktop app on your test workspace folder (<code>~/IBM ICA-Codex-Integration-Toolkit</code>) and send:
         </p>
         <div class="code-container">
           <div class="code-header">
@@ -1548,6 +1562,38 @@ codex</pre>
 
         <div class="search-box">
           <input type="text" id="faqSearch" class="form-input" placeholder="🔍 Filter issues (e.g. 'permission', 'execution policy', 'openai', '.env')..." oninput="filterFaq()">
+        </div>
+
+        <!-- Issue -1: Clean Reinstall & Automated Uninstaller -->
+        <div class="faq-item open">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>🧹 Fresh Install & Complete Cleanup (Automated Uninstaller)</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>If you need to perform a clean reinstall, reset misconfigured settings, or completely remove Codex CLI and ICA configuration, run the automated uninstaller. It prompts for explicit user confirmation before taking any action and offers an automatic backup of your existing <code>~/.codex</code> directory.</p>
+            <div style="display:flex; gap:10px; margin: 10px 0 14px; flex-wrap:wrap;">
+              <a href="uninstall-codex-ica.ps1" download="uninstall-codex-ica.ps1" class="btn os-win" style="padding: 8px 14px; font-size: 0.88rem;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download uninstall-codex-ica.ps1
+              </a>
+              <a href="uninstall-codex-ica.sh" download="uninstall-codex-ica.sh" class="btn os-mac" style="padding: 8px 14px; font-size: 0.88rem;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download uninstall-codex-ica.sh
+              </a>
+            </div>
+            <div class="code-container">
+              <div class="code-header">
+                <span><span class="os-win">PowerShell (Windows)</span><span class="os-mac">Terminal (macOS/Linux)</span></span>
+                <button class="copy-btn" onclick="copyCode('faq-fix-uninstall')">📋 Copy</button>
+              </div>
+              <pre id="faq-fix-uninstall" class="os-win">powershell -ExecutionPolicy Bypass -File .\uninstall-codex-ica.ps1</pre>
+              <pre id="faq-fix-uninstall-mac" class="os-mac" style="display:none;">chmod +x ./uninstall-codex-ica.sh && ./uninstall-codex-ica.sh</pre>
+            </div>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-muted);">
+              <strong>Available Flags:</strong> <code>-DryRun</code> / <code>--dry-run</code> (preview actions without modifying system), <code>-KeepConfig</code> / <code>--keep-config</code> (preserve <code>~/.codex</code>), <code>-KeepApiKey</code> / <code>--keep-api-key</code> (preserve User env key).
+            </p>
+          </div>
         </div>
 
         <!-- Issue 0: UTF-8 BOM Error -->
@@ -1855,6 +1901,12 @@ npm install -g @openai/codex</pre>
       if (document.getElementById('chatgpt-install-cmd-mac')) {
         document.getElementById('chatgpt-install-cmd-mac').style.display = isWin ? 'none' : 'block';
       }
+      if (document.getElementById('faq-fix-uninstall')) {
+        document.getElementById('faq-fix-uninstall').style.display = isWin ? 'block' : 'none';
+      }
+      if (document.getElementById('faq-fix-uninstall-mac')) {
+        document.getElementById('faq-fix-uninstall-mac').style.display = isWin ? 'none' : 'block';
+      }
 
       localStorage.setItem('codex_ica_platform', platform);
       regenerateConfig();
@@ -1898,7 +1950,11 @@ npm install -g @openai/codex</pre>
     }
 
     function copyCode(elementId) {
-      const el = document.getElementById(elementId);
+      let targetId = elementId;
+      if (currentPlatform === 'mac' && document.getElementById(elementId + '-mac')) {
+        targetId = elementId + '-mac';
+      }
+      const el = document.getElementById(targetId);
       if (!el) return;
       const text = el.innerText;
       navigator.clipboard.writeText(text).then(() => {

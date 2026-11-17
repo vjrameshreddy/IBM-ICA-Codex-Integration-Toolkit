@@ -158,7 +158,7 @@ CATALOG_JSON_FILE="$MODEL_CATALOG_DIR/ica-models.json"
 CONFIG_FILE="$CODEX_DIR/config.toml"
 ENV_FILE="$CODEX_DIR/.env"
 SECURITY_CONFIG_FILE="$CODEX_DIR/codex-security.yaml"
-TEST_DIR="$HOME/codex-ica-test"
+TEST_DIR="$HOME/IBM ICA-Codex-Integration-Toolkit"
 
 # Codex Security project configuration (YAML). Contains NO credentials: it only names the ICA_API_KEY environment variable.
 # Keys tested against @openai/codex-security v0.10.0 (schema: project-config.schema.json).
@@ -216,6 +216,7 @@ check_cmd() {
 check_cmd "Node.js" "node"
 check_cmd "npm" "npm"
 check_cmd "Git" "git"
+check_cmd "GitHub CLI" "gh"
 check_cmd "Python 3" "python3"
 check_cmd "VS Code" "code" "IBMers: Install via official 'Mac@IBM' internal software catalog"
 check_cmd "Codex CLI" "codex"
@@ -231,6 +232,7 @@ fi
 # VS Code is intentionally excluded: IBM-managed machines must install it via Mac@IBM.
 MISSING_BREW=()
 command -v git >/dev/null 2>&1 || MISSING_BREW+=(git)
+command -v gh >/dev/null 2>&1 || MISSING_BREW+=(gh)
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then MISSING_BREW+=(node); fi
 command -v python3 >/dev/null 2>&1 || MISSING_BREW+=(python)
 
@@ -287,7 +289,7 @@ echo -e "\n${WHITE} 4. Process & Package Management:${NC}"
 if [ ${#MISSING_BREW[@]} -gt 0 ]; then
     echo -e "    - Prerequisites: Will offer to install via brew: ${MISSING_BREW[*]}"
 else
-    echo -e "    - Prerequisites: Git, Node.js, npm and Python already installed"
+    echo -e "    - Prerequisites: Git, GitHub CLI, Node.js, npm and Python already installed"
 fi
 if ! command -v code >/dev/null 2>&1; then
     echo -e "    - VS Code     : Missing - install manually via 'Mac@IBM' (not installed by this script)"

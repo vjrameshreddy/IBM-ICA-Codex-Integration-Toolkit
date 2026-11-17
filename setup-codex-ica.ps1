@@ -154,18 +154,19 @@ $CatalogJsonFile = Join-Path $ModelCatalogDir "ica-models.json"
 $ConfigFile = Join-Path $CodexDir "config.toml"
 $EnvFile = Join-Path $CodexDir ".env"
 $SecurityConfigFile = Join-Path $CodexDir "codex-security.yaml"
-$TestDir = Join-Path $HOME "codex-ica-test"
+$TestDir = Join-Path $HOME "IBM ICA-Codex-Integration-Toolkit"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # 2. Check Prerequisites
 Write-Step "Inspecting current system environment..."
 
 $Prereqs = @{
-    "Node.js" = "node -v"
-    "npm"     = "npm -v"
-    "Git"     = "git --version"
-    "Python"  = "python --version"
-    "VS Code" = "code --version"
+    "Node.js"    = "node -v"
+    "npm"        = "npm -v"
+    "Git"        = "git --version"
+    "GitHub CLI" = "gh --version"
+    "Python"     = "python --version"
+    "VS Code"    = "code --version"
 }
 
 $ToolStatus = @{}
@@ -219,9 +220,10 @@ if ($SecurityVer) {
 # Missing prerequisites that can be installed automatically via winget.
 # VS Code is intentionally excluded: IBM-managed machines must install it via PC@IBM / Mac@IBM.
 $WingetPackages = [ordered]@{
-    "Git"     = "Git.Git"
-    "Node.js" = "OpenJS.NodeJS.LTS"
-    "Python"  = "Python.Python.3.14"
+    "Git"        = "Git.Git"
+    "GitHub CLI" = "GitHub.cli"
+    "Node.js"    = "OpenJS.NodeJS.LTS"
+    "Python"     = "Python.Python.3.14"
 }
 $MissingPrereqs = @()
 foreach ($Tool in $WingetPackages.Keys) {
@@ -576,7 +578,7 @@ Write-Host "`n 4. Process & Extension Management:" -ForegroundColor White
 if ($MissingPrereqs.Count -gt 0) {
     Write-Host "    - Prerequisites: Will offer to install via winget: $($MissingPrereqs -join ', ')" -ForegroundColor Yellow
 } else {
-    Write-Host "    - Prerequisites: Git, Node.js, npm and Python already installed" -ForegroundColor Gray
+    Write-Host "    - Prerequisites: Git, GitHub CLI, Node.js, npm and Python already installed" -ForegroundColor Gray
 }
 if (-not $ToolStatus["VS Code"]) {
     Write-Host "    - VS Code     : Missing - install manually via 'PC@IBM' (not installed by this script)" -ForegroundColor Yellow
@@ -651,9 +653,9 @@ if ($MissingPrereqs.Count -gt 0) {
                 }
             }
         }
-        # Reload PATH so newly installed tools (node, npm, git) are visible in this session
+        # Reload PATH so newly installed tools (node, npm, git, gh) are visible in this session
         $env:Path = [System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')
-        foreach ($Cmd in @('git', 'node', 'npm')) {
+        foreach ($Cmd in @('git', 'gh', 'node', 'npm')) {
             if (-not (Get-Command $Cmd -ErrorAction SilentlyContinue)) {
                 Write-WarningMsg "$Cmd is still not on PATH. Open a new terminal after setup completes."
             }

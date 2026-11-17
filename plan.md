@@ -40,6 +40,8 @@ The **IBM ICA + Codex Integration Toolkit** bridges **OpenAI Codex** (CLI, VS Co
 |---|---|:---:|---|
 | [`setup-codex-ica.ps1`](setup-codex-ica.ps1) | Windows (PowerShell 5.1/7+) | `v2.3.0` | Automated setup, non-BOM UTF-8 catalog writer, TOML merger, NTFS security, background daemon recycler. |
 | [`setup-codex-ica.sh`](setup-codex-ica.sh) | macOS / Linux (Zsh / Bash) | `v2.3.0` | Automated setup, `.npm-global` prefix configuration, TOML merger, `chmod 600` secret permissions. |
+| [`uninstall-codex-ica.ps1`](uninstall-codex-ica.ps1) | Windows (PowerShell 5.1/7+) | `v2.3.0` | Automated uninstaller & cleanup, user confirmation, daemon recycling, npm package removal, env var cleanup. |
+| [`uninstall-codex-ica.sh`](uninstall-codex-ica.sh) | macOS / Linux (Zsh / Bash) | `v2.3.0` | Automated uninstaller & cleanup, user confirmation, daemon recycling, npm package removal, env file cleanup. |
 | [`index.html`](index.html) | Modern Web Browsers | `v2.3.0` | Standalone zero-dependency interactive setup assistant with dark/light themes and live config generators. |
 | [`ica-models.json`](ica-models.json) | Local Codex Catalog | `v2.3.0` | RFC 8259 JSON catalog supporting all 6 ICA models. |
 | [`AGENTS.md`](AGENTS.md) | AI Coding Agents | `v2.3.0` | Root engineering rules, critical gotchas, and non-obvious project knowledge. |

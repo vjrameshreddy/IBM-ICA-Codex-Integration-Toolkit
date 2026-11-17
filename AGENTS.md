@@ -2,27 +2,49 @@
 
 This file provides guidance to agents when working with code in this repository.
 
-## Non-Obvious Project Gotchas & Critical Rules
+Stack: PowerShell 5.1/7+ and Bash scripts plus a single offline `index.html`. There is no package manager, linter, formatter or automated test suite. Validate with the commands below.
 
-- **UTF-8 BOM Prohibition**: Windows PowerShell `[System.Text.Encoding]::UTF8` and `Out-File -Encoding utf8` emit a UTF-8 BOM (`\ufeff`). The Rust-based Codex JSON parser fails with `expected value at line 1 column 1` on BOM files. ALWAYS write files with `New-Object System.Text.UTF8Encoding($false)` via `[System.IO.File]::WriteAllText()`.
-- **TOML Top-Level Placement**: In `~/.codex/config.toml`, `model`, `model_provider`, `model_catalog_json`, and `model_reasoning_effort` MUST precede any `[table]` headers. Placing them below any section header attaches them to that table, causing Codex to fall back to `provider: openai`.
-- **Windows Path Escaping in TOML**: `model_catalog_json` in `config.toml` requires double-escaped backslashes (`C:\\Users\\<user>\\.codex\\model-catalog\\ica-models.json`).
-- **Codex Daemon Cache**: Codex CLI spawns persistent background processes (`codex.exe`, `node_repl.exe`). Changes to `ICA_API_KEY` require killing daemons (`Stop-Process -Name codex,node_repl -Force`) and setting the User Environment Variable (`[System.Environment]::SetEnvironmentVariable('ICA_API_KEY', $k, 'User')`).
-- **Secret Permissions**: Any file holding `ICA_API_KEY` (`.env` or `.env.bak.*`) must use owner-only permissions: `icacls $path /inheritance:r /grant:r "${env:USERNAME}:F"` on Windows, `chmod 600` on macOS/Linux.
-- **ChatGPT Desktop App Shared Scope**: The desktop app reads `~/.codex/config.toml` directly. Do not mix personal ChatGPT accounts with the work `~/.codex` profile.
-- **Standalone Web Architecture**: `index.html` is zero-dependency (no external CDNs/fonts/scripts) to work completely offline in air-gapped or restricted IBM intranet environments.
-- **IBM Enterprise Workstation Banner**: `index.html` repeats the same "🏢 IBM Enterprise Workstation Requirement (PC@IBM / Mac@IBM)" callout in three tabs: Fast-Track (`tab-auto`), Step 1 (`tab-prereqs`), and Step 4 (`tab-clients`). Keep the three copies identical when editing.
-- **Existing Configuration Info Banner**: The "ℹ️ Prerequisite: install VS Code first — existing Codex configuration is preserved and merged" callout (`<!-- Existing Configuration Info -->`) is likewise repeated in the same three tabs. Its claims must match script behavior: `config.toml` is merged, `.env` key can be kept, `ica-models.json` is rewritten (backup/skip offered).
-- **Script Flag Parity**: `setup-codex-ica.ps1` (`-DryRun -Yes -AutoBackup -Overwrite -SkipKeyPrompt -NonInteractive`) and `setup-codex-ica.sh` (`--dry-run --yes --auto-backup --overwrite --skip-key-prompt`) must stay in sync, including the codex-security step and the numbering of Next Steps. There is no automated test suite; validate with the dry-run and syntax commands below.
-- **Codex Security via ICA**: `codex-security` uses its own Codex home and does NOT inherit the provider from `~/.codex/config.toml`, so a plain scan falls back to OpenAI web login. ICA is selected either by a project config (`-c FILE` or `CODEX_SECURITY_PROJECT_CONFIG`; none is discovered automatically) or by explicit `--codex model_providers.ica.*` overrides (TOML values need `\"` escaping on Windows PowerShell 5.1). `codex-security-ica.ps1` prefers `~/.codex/codex-security.yaml` (`-ConfigPath`) and falls back to the overrides; either way auto auth and `--auth api-key` resolve to `ICA_API_KEY`. Authentication success is not scan success: the Windows sandbox startup failure is a separate, unresolved problem, and a `-DryRun` is not a completed scan. Never set `CODEX_SECURITY_STATE_DIR` or copy the ICA key into `OPENAI_API_KEY` (it would be sent to OpenAI). Preview with `.\codex-security-ica.ps1 -DryRun`.
-- **Codex Security Setup Step (v2.3.0)**: Both setup scripts offer an optional `@openai/codex-security` install (prompt defaults to No; `-Yes`/`-NonInteractive`/`--yes` do not enable it; never upgrade Node automatically, it needs `^22.13 || ^24 || ^26`) and write `~/.codex/codex-security.yaml` (UTF-8 no BOM, LF, never credentials; `auth: api-key` and `env_key: ICA_API_KEY` must stay consistent). The file is selected via `CODEX_SECURITY_PROJECT_CONFIG`: a User env var on Windows, a line in `~/.codex/.env` (backup + `chmod 600` first) on macOS/Linux. If it already points elsewhere, show the conflict and ask (default keep); never replace it silently. The YAML schema was tested only against codex-security v0.10.0. Keep the ps1 and sh behavior identical.
-- **ChatGPT Desktop Is Manual-Only**: Scripts must never install it (needs administrator privileges). `-InstallChatGPT` / `--install-chatgpt` are deprecated no-op flags kept for backward compatibility; both scripts print the same warning when they are passed. A matching "ChatGPT Desktop App is not installed by the automated setup" banner lives in the Fast-Track, Step 1 and Step 4 tabs of `index.html`.
+## Commands
 
-## Essential Commands
+Run from the repo root. There is no unit-test runner, so the "single test" is a dry-run of one script or one live Codex prompt.
 
-- **Dry-run PowerShell setup**: `powershell -ExecutionPolicy Bypass -File .\setup-codex-ica.ps1 -DryRun`
-- **Dry-run Shell setup**: `bash ./setup-codex-ica.sh --dry-run`
-- **Validate PowerShell script syntax**: `powershell -Command "[System.Management.Automation.Language.Parser]::ParseFile('.\setup-codex-ica.ps1', [ref]\$null, [ref]\$null)"`
-- **Validate Bash script syntax**: `bash -n ./setup-codex-ica.sh`
-- **Validate Model Catalog JSON**: `python -m json.tool .\ica-models.json`
-- **Single Test Prompt via CLI**: `cd "$HOME\codex-ica-test"; codex exec "Say hello in one sentence. Do not create or modify any files."`
+- Dry-run setup: `powershell -ExecutionPolicy Bypass -File .\setup-codex-ica.ps1 -DryRun` / `bash ./setup-codex-ica.sh --dry-run`
+- Dry-run uninstall: `powershell -ExecutionPolicy Bypass -File .\uninstall-codex-ica.ps1 -DryRun` / `bash ./uninstall-codex-ica.sh --dry-run`
+- Dry-run codex-security wrapper: `.\codex-security-ica.ps1 -DryRun`. It is not a completed scan.
+- PowerShell syntax check (run in PowerShell, repeat for each `.ps1`): `$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path .\setup-codex-ica.ps1).Path,[ref]$null,[ref]$e); $e.Count`. The result must be `0`.
+- Bash syntax check: `bash -n ./setup-codex-ica.sh` (also `./uninstall-codex-ica.sh`)
+- Catalog JSON check: `python -m json.tool .\ica-models.json`
+- Live single prompt: `cd "$HOME\IBM ICA-Codex-Integration-Toolkit"; codex exec "Say hello in one sentence. Do not create or modify any files."`
+
+## Code style
+
+- No formatter config exists, so match the surrounding file. The scripts use banner/section helpers (e.g. `Write-HeaderBox`) and print a version banner at startup.
+- Version `2.3.0` is hard-coded in many places: script header comment, startup banner, `index.html` badge, `README.md`, `plan.md` and `RELEASE_NOTES.md`. Bump all of them together and add a `RELEASE_NOTES.md` entry.
+- Flag naming: PowerShell uses `-PascalCase` switches. Bash uses `--kebab-case` with the same meaning. Keep them in sync (see Parity below).
+- Destructive or confirm prompts default to No (`[y/N]`). `-Yes`/`--yes` and `-NonInteractive` must not enable optional installs (codex-security, ChatGPT Desktop).
+
+## Critical gotchas
+
+- **No UTF-8 BOM**: `[System.Text.Encoding]::UTF8` and `Out-File`/`Set-Content -Encoding utf8` emit a BOM on Windows PowerShell 5.1, and the Rust Codex parser then fails with `expected value at line 1 column 1`. Write files with `[System.IO.File]::WriteAllText($p, $txt, (New-Object System.Text.UTF8Encoding($false)))`. This applies to `config.toml`, `ica-models.json` and `codex-security.yaml`. Use LF in the YAML.
+- **TOML top-level keys**: `model`, `model_provider`, `model_catalog_json` and `model_reasoning_effort` must come before any `[table]` header in `~/.codex/config.toml`. Otherwise they attach to that table and Codex falls back to `provider: openai`.
+- **TOML Windows paths**: `model_catalog_json` needs doubled backslashes (`C:\\Users\\<user>\\.codex\\model-catalog\\ica-models.json`).
+- **Merge, don't overwrite `config.toml`**: keep `[plugins]`, `[marketplaces]`, `[mcp_servers]` and `[shell_environment_policy]`. Strip conflicting top-level keys and stale `[model_providers.ica]` before prepending the new block.
+- **Provider**: `[model_providers.ica]` uses `wire_api = "responses"`, `env_key = "ICA_API_KEY"` and base URL `https://api.servicesessentials.ibm.com/v1`. Every model slug in `config.toml` must exist in `ica-models.json` `"models"`.
+- **Secrets**: Never pass `ICA_API_KEY` as an argument or commit it. Prompt with `Read-Host -AsSecureString` on Windows and `read -s` on macOS/Linux. Restrict any `.env` or `.env.bak.*` to the owner (`icacls $p /inheritance:r /grant:r "${env:USERNAME}:F"` or `chmod 600`). Backups use `*.bak.yyyyMMdd_HHmmss`.
+- **Daemons**: After changing `ICA_API_KEY`, set the User env var (`[Environment]::SetEnvironmentVariable('ICA_API_KEY',$k,'User')`) and run `Stop-Process -Name codex,node_repl -Force`. A running Codex does not pick up the new value.
+- **Dry-run is mandatory**: Every mutating operation must have a non-writing preview path.
+
+## Parity and duplicated content
+
+- `setup-codex-ica.ps1` (`-DryRun -Yes -AutoBackup -Overwrite -SkipKeyPrompt -NonInteractive`) and `setup-codex-ica.sh` (`--dry-run --yes --auto-backup --overwrite --skip-key-prompt`) must behave identically. That includes the codex-security step and the numbering of "Next Steps". The same applies to the `uninstall-codex-ica.{ps1,sh}` pair (`-DryRun -Yes -KeepConfig -KeepApiKey -NonInteractive` / `--dry-run --yes --keep-config --keep-api-key`).
+- `index.html` repeats two callouts in three tabs: Fast-Track (`tab-auto`), Step 1 (`tab-prereqs`) and Step 4 (`tab-clients`). They are the "IBM Enterprise Workstation Requirement (PC@IBM / Mac@IBM)" banner, the "Existing Configuration Info" banner and the "ChatGPT Desktop App is not installed by the automated setup" banner. Keep the three copies of each identical. The Existing Configuration claims must match script behavior: `config.toml` is merged, the `.env` key can be kept, and `ica-models.json` is rewritten (backup/skip offered).
+- `index.html` must stay zero-dependency (no CDN, fonts or external scripts) so it works offline on the IBM intranet. Progress is computed from all `.step-check` checkboxes (`check-prereqs`, `check-portal`, `check-manual`, `check-clients`, `check-testing`).
+- ChatGPT Desktop is manual-only (needs admin). `-InstallChatGPT` / `--install-chatgpt` are deprecated no-ops that print the same warning. The desktop app shares `~/.codex/config.toml`, so don't mix a personal ChatGPT account with the work profile.
+
+## Codex Security (optional, opt-in)
+
+- `codex-security` has its own Codex home and ignores `~/.codex/config.toml`, so a plain scan falls back to OpenAI web login. ICA is selected only through a project config (`-c FILE` or `CODEX_SECURITY_PROJECT_CONFIG`, never auto-discovered) or `--codex model_providers.ica.*` overrides. In Windows PowerShell 5.1 the TOML values need `\"` escaping.
+- Setup writes `~/.codex/codex-security.yaml` (no BOM, no credentials, `auth: api-key`, `env_key: ICA_API_KEY`). It is selected through the `CODEX_SECURITY_PROJECT_CONFIG` User env var on Windows, or a line in `~/.codex/.env` (backup + `chmod 600` first) on macOS/Linux. If it already points elsewhere, show the conflict and ask (default keep). Never replace it silently.
+- Installing `@openai/codex-security` needs an explicit Yes (default No). Node must be `^22.13 || ^24 || ^26` and is never upgraded automatically.
+- `codex-security-ica.ps1` prefers `~/.codex/codex-security.yaml` (`-ConfigPath`) and falls back to the overrides. Never set `CODEX_SECURITY_STATE_DIR`, and never copy the ICA key into `OPENAI_API_KEY` (it would be sent to OpenAI).
+- Auth success is not scan success: the Windows sandbox startup failure is a separate, unresolved problem. The YAML schema was tested only against codex-security v0.10.0.
