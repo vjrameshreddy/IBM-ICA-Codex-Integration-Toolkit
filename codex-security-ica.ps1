@@ -3,16 +3,24 @@
     Runs "codex-security scan" against IBM Consulting Advantage (ICA) instead of OpenAI.
 
 .DESCRIPTION
-    codex-security only reads OPENAI_API_KEY / CODEX_API_KEY / stored login by default, and
-    ignores ICA_API_KEY. This wrapper passes the ICA provider settings (same values as
-    ~/.codex/config.toml) so the scan authenticates with ICA_API_KEY and calls the ICA
-    Responses API.
+    codex-security uses its own Codex home and does not inherit the provider from
+    ~/.codex/config.toml, so by default it falls back to stored credentials / OpenAI sign-in.
+    This wrapper selects ICA so the scan authenticates with ICA_API_KEY and calls the ICA
+    Responses API:
 
+    - If ~/.codex/codex-security.yaml exists (written by setup-codex-ica), it is reused with
+      "-c". Otherwise the same ICA provider settings are passed as explicit --codex overrides.
+      Either way, auto authentication and "--auth api-key" both resolve to ICA_API_KEY.
     - The key is read from the ICA_API_KEY environment variable only. It is never printed
       and never passed as an argument.
     - CODEX_CLI_PATH is pointed at your installed Codex (when found) for the duration of the
       scan only. The previous value is restored afterwards.
     - A scan sends repository content to the ICA endpoint. Use -DryRun to preview first.
+
+    IMPORTANT: selecting ICA authentication does not guarantee that a scan completes. Codex
+    must also start its Windows sandbox, which is a separate problem; on some machines scans
+    stop at "building threat model". -DryRun only previews authentication and model selection
+    and is never proof that a scan will complete.
 
 .PARAMETER Repository
     Repository to scan. Default: current directory.
@@ -35,6 +43,11 @@
 
 .PARAMETER DryRun
     Validate inputs and show the resolved authentication without running a scan.
+
+.PARAMETER ConfigPath
+    Codex Security project config to use. Default: ~/.codex/codex-security.yaml when it exists,
+    otherwise explicit --codex ICA overrides. CODEX_SECURITY_PROJECT_CONFIG is not followed
+    automatically, because it may point to a non-ICA configuration.
 
 .PARAMETER CodexPath
     Explicit path to codex.exe. Default: existing CODEX_CLI_PATH, else "codex" on PATH.
@@ -62,6 +75,7 @@ param(
     [string]$Mode = 'standard',
     [string]$Model = 'gpt-advantage-assist',
     [switch]$DryRun,
+    [string]$ConfigPath,
     [string]$CodexPath,
 
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -121,16 +135,34 @@ foreach ($p in $Path) {
 $q = if ($PSVersionTable.PSVersion -ge [version]'7.3') { '"' } else { '\"' }
 function ConvertTo-TomlArg([string]$Key, [string]$Value) { "$Key=$q$Value$q" }
 
+# Reuse the project config written by setup-codex-ica when present; otherwise fall back to overrides.
+if (-not $ConfigPath) {
+    $defaultConfig = Join-Path (Join-Path $HOME '.codex') 'codex-security.yaml'
+    if (Test-Path -LiteralPath $defaultConfig) { $ConfigPath = $defaultConfig }
+}
+if ($ConfigPath -and -not (Test-Path -LiteralPath $ConfigPath)) {
+    throw "ConfigPath not found: $ConfigPath"
+}
+
 $scanArgs = @('scan', $Repository)
 foreach ($p in $Path) { if ($p) { $scanArgs += @('--path', $p) } }
 if ($Diff) { $scanArgs += @('--diff', $Diff) }
 if ($WorkingTree) { $scanArgs += '--working-tree' }
-$scanArgs += @('--mode', $Mode, '--auth', 'api-key', '--model', $Model)
-$scanArgs += @('--codex', (ConvertTo-TomlArg 'model_provider' 'ica'))
-$scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.name' 'ICA'))
-$scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.base_url' $IcaBaseUrl))
-$scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.wire_api' 'responses'))
-$scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.env_key' $IcaEnvKey))
+$scanArgs += @('--mode', $Mode)
+if ($ConfigPath) {
+    $scanArgs += @('-c', $ConfigPath)
+    # The file already selects the ICA provider, model and api-key auth; only override the model on request.
+    if ($PSBoundParameters.ContainsKey('Model')) { $scanArgs += @('--model', $Model) }
+    $configSource = "project config $ConfigPath"
+} else {
+    $scanArgs += @('--auth', 'api-key', '--model', $Model)
+    $scanArgs += @('--codex', (ConvertTo-TomlArg 'model_provider' 'ica'))
+    $scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.name' 'ICA'))
+    $scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.base_url' $IcaBaseUrl))
+    $scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.wire_api' 'responses'))
+    $scanArgs += @('--codex', (ConvertTo-TomlArg 'model_providers.ica.env_key' $IcaEnvKey))
+    $configSource = 'explicit --codex ICA overrides (no ~/.codex/codex-security.yaml found)'
+}
 if ($DryRun) { $scanArgs += '--dry-run' }
 if ($ExtraArgs) { $scanArgs += $ExtraArgs }
 
@@ -141,14 +173,21 @@ try {
     if ($CodexPath) { $env:CODEX_CLI_PATH = $CodexPath }
     if ($keyFromUser) { [Environment]::SetEnvironmentVariable($IcaEnvKey, $keyFromUser, 'Process') }
 
+    Write-Host "[INFO] ICA selection via $configSource." -ForegroundColor DarkGray
     if (-not $DryRun) {
-        Write-Host "[INFO] Scanning '$Repository' with ICA model '$Model'. Repository content is sent to $IcaBaseUrl." -ForegroundColor Cyan
+        Write-Host "[INFO] Scanning '$Repository' with ICA. Repository content is sent to $IcaBaseUrl." -ForegroundColor Cyan
     }
 
     # codex-security writes progress to stderr, so do not redirect it or stop on it.
     $ErrorActionPreference = 'Continue'
     & codex-security @scanArgs
     $exit = $LASTEXITCODE
+
+    if ($DryRun) {
+        Write-Host "[DRY-RUN] Preview only: this shows the resolved ICA authentication and model, not a completed scan. Sandbox startup is not tested." -ForegroundColor Yellow
+    } elseif ($exit -ne 0) {
+        Write-Host "[NOTE] ICA authentication being selected does not guarantee the scan completes. If the error mentions the Windows sandbox, that is a separate problem from authentication (see the README)." -ForegroundColor Yellow
+    }
 }
 finally {
     $env:CODEX_CLI_PATH = $savedCliPath

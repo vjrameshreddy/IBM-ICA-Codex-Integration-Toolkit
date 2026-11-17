@@ -1,6 +1,6 @@
 # IBM ICA (IBM Consulting Advantage) + Codex Integration Toolkit
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-informational.svg)
 
@@ -12,9 +12,9 @@ A comprehensive setup, automation, and guidance toolkit to configure **OpenAI Co
 
 | File | Description |
 | :--- | :--- |
-| [**`index.html`**](index.html) | **Interactive Web Integration Toolkit** (`v2.2.0`) — A visual, step-by-step assistant for non-technical users and developers with an OS toggle, live config generator, and troubleshooting guide. |
-| [**`setup-codex-ica.ps1`**](setup-codex-ica.ps1) | **Windows Automation Script** (`v2.2.0`) — Automated PowerShell setup (directory scaffolding, BOM-free model catalog creation, TOML merging, secure key prompt, and NTFS permissions). |
-| [**`setup-codex-ica.sh`**](setup-codex-ica.sh) | **macOS / Linux Automation Script** (`v2.2.0`) — Automated Shell script (npm global prefix fix, model catalog creation, TOML merging, and `chmod 600`). |
+| [**`index.html`**](index.html) | **Interactive Web Integration Toolkit** (`v2.3.0`) — A visual, step-by-step assistant for non-technical users and developers with an OS toggle, live config generator, and troubleshooting guide. |
+| [**`setup-codex-ica.ps1`**](setup-codex-ica.ps1) | **Windows Automation Script** (`v2.3.0`) — Automated PowerShell setup (directory scaffolding, BOM-free model catalog creation, TOML merging, secure key prompt, and NTFS permissions). |
+| [**`setup-codex-ica.sh`**](setup-codex-ica.sh) | **macOS / Linux Automation Script** (`v2.3.0`) — Automated Shell script (npm global prefix fix, model catalog creation, TOML merging, and `chmod 600`). |
 | [**`ica-models.json`**](ica-models.json) | **ICA Model Catalog** — Complete, valid JSON definition for all 6 ICA models (`gpt-advantage-assist`, `gpt-5.6-sol`, `gpt-5.6-luna`, `gpt-5.6-terra`, `gpt-5.4`, `gpt-5.1`). |
 | [**`RELEASE_NOTES.md`**](RELEASE_NOTES.md) | **Release Notes & Security Assessment** — Complete version history, security vulnerability audit, and filesystem migration records. |
 | [**`plan.md`**](plan.md) | **Architecture & Development Plan** — System architecture, client integration boundaries, and maintenance strategy. |
@@ -200,9 +200,19 @@ Apply restricted owner-only permissions:
 
 - `codex-security` uses its **own Codex home** (`~/.codex/state/plugins/codex-security/codex-home`), not `~/.codex`.
 - It **does not inherit the provider configuration** from `~/.codex/config.toml`. A plain `codex-security scan` therefore falls back to stored credentials and OpenAI (web login), even though `codex` itself works with ICA.
-- **Explicit `--codex` provider overrides are required** to select ICA (provider name, `base_url`, `wire_api`, `env_key`). The wrapper passes them for you.
+- **An explicit ICA provider selection is required** (provider name, `base_url`, `wire_api`, `env_key`). Either a project config file (`-c FILE` / `CODEX_SECURITY_PROJECT_CONFIG`) or `--codex` overrides provide it. The wrapper uses `~/.codex/codex-security.yaml` when present and otherwise falls back to the overrides.
 - With those overrides, **both automatic authentication and `--auth api-key` resolve to `ICA_API_KEY`** (confirmed with `--dry-run`: `method: api_key`, `source: ICA_API_KEY`, `modelProvider: ica`). The wrapper uses `--auth api-key` so it never falls back to a web login.
 - Do not set `CODEX_SECURITY_STATE_DIR` or copy the ICA key into `OPENAI_API_KEY` (it would be sent to OpenAI). `ICA_API_KEY` and `.env` are used as-is.
+
+### Setup script integration (v2.3.0, opt-in)
+
+`setup-codex-ica.ps1` / `setup-codex-ica.sh` detect `codex-security` and can optionally:
+
+- Install `@openai/codex-security` (prompt **defaults to No**; `-Yes` / `-NonInteractive` / `--yes` do not enable it; Node.js is never upgraded automatically, it needs `^22.13 || ^24 || ^26`).
+- Write `~/.codex/codex-security.yaml` (UTF-8 without BOM, **no credentials**; `auth: api-key` and `env_key: ICA_API_KEY`). Existing files follow the usual backup / overwrite / skip prompts.
+- Select it through `CODEX_SECURITY_PROJECT_CONFIG` (User environment variable on Windows, `~/.codex/.env` on macOS/Linux). If the variable already points to another file, the conflict is shown and you are asked; it is never replaced silently.
+
+The YAML schema was tested against **codex-security v0.10.0** only. A completed real scan has not been verified from the CLI on the test machine.
 
 ### Usage
 

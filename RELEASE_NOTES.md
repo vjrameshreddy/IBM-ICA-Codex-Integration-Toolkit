@@ -4,6 +4,21 @@ All notable changes, architectural updates, security assessments, and configurat
 
 ---
 
+## [2.3.0] — 2026-11-17
+
+### 🚀 Features Added
+- **Optional `codex-security` support in both setup scripts** (`setup-codex-ica.ps1`, `setup-codex-ica.sh`): detects `codex-security` and its version, checks Node.js (`^22.13 || ^24 || ^26`), and offers to install `@openai/codex-security`. The prompt **defaults to No**, `-Yes` / `-NonInteractive` / `--yes` do not enable it, and Node.js is never upgraded automatically.
+- **ICA project config** `~/.codex/codex-security.yaml` (UTF-8 without BOM, no credentials, `auth: api-key` + `env_key: ICA_API_KEY`). Existing files follow the usual backup / overwrite / skip prompts. Schema tested against **codex-security v0.10.0** only.
+- **`CODEX_SECURITY_PROJECT_CONFIG`** selects that file: set as a User environment variable on Windows, and written to `~/.codex/.env` (backed up, `chmod 600`) on macOS/Linux. If it already points elsewhere, the conflict is shown and you are asked; it is never replaced silently (default: keep).
+- **`codex-security-ica.ps1`** reuses the project config via the new `-ConfigPath` parameter, keeps `-Path` validation and `-DryRun`, and states that auth selection does not guarantee sandbox startup or scan completion.
+- `index.html`: version badge `v2.3.0`, a new Fast-Track callout and a Step 1 table row for the optional scanner.
+
+### ⚠️ Known Limitations
+- Selecting ICA for `codex-security` only fixes authentication. A scan can still fail at the Windows sandbox setup stage (`failed to prepare Windows sandbox`); this is a separate, unresolved problem.
+- A `-DryRun` of the wrapper previews the selected method only and is not a completed scan.
+
+---
+
 ## [2.2.0] — 2026-11-15
 
 ### 🔄 Changed

@@ -1,6 +1,6 @@
 # Development & Architecture Plan — IBM ICA + Codex Integration Toolkit
 
-**Current Version**: `v2.2.0`  
+**Current Version**: `v2.3.0`  
 **Status**: Active / Production Ready  
 **Upstream Reference**: `IBM_Codex_ICA_Getting_Started_Guide.docx`
 
@@ -38,12 +38,12 @@ The **IBM ICA + Codex Integration Toolkit** bridges **OpenAI Codex** (CLI, VS Co
 
 | Deliverable | Target System | Version | Role |
 |---|---|:---:|---|
-| [`setup-codex-ica.ps1`](setup-codex-ica.ps1) | Windows (PowerShell 5.1/7+) | `v2.2.0` | Automated setup, non-BOM UTF-8 catalog writer, TOML merger, NTFS security, background daemon recycler. |
-| [`setup-codex-ica.sh`](setup-codex-ica.sh) | macOS / Linux (Zsh / Bash) | `v2.2.0` | Automated setup, `.npm-global` prefix configuration, TOML merger, `chmod 600` secret permissions. |
-| [`index.html`](index.html) | Modern Web Browsers | `v2.2.0` | Standalone zero-dependency interactive setup assistant with dark/light themes and live config generators. |
-| [`ica-models.json`](ica-models.json) | Local Codex Catalog | `v2.2.0` | RFC 8259 JSON catalog supporting all 6 ICA models. |
-| [`AGENTS.md`](AGENTS.md) | AI Coding Agents | `v2.2.0` | Root engineering rules, critical gotchas, and non-obvious project knowledge. |
-| [`RELEASE_NOTES.md`](RELEASE_NOTES.md) | All Developers / Audit | `v2.2.0` | Comprehensive version-wise changes, security assessments, and migration history. |
+| [`setup-codex-ica.ps1`](setup-codex-ica.ps1) | Windows (PowerShell 5.1/7+) | `v2.3.0` | Automated setup, non-BOM UTF-8 catalog writer, TOML merger, NTFS security, background daemon recycler. |
+| [`setup-codex-ica.sh`](setup-codex-ica.sh) | macOS / Linux (Zsh / Bash) | `v2.3.0` | Automated setup, `.npm-global` prefix configuration, TOML merger, `chmod 600` secret permissions. |
+| [`index.html`](index.html) | Modern Web Browsers | `v2.3.0` | Standalone zero-dependency interactive setup assistant with dark/light themes and live config generators. |
+| [`ica-models.json`](ica-models.json) | Local Codex Catalog | `v2.3.0` | RFC 8259 JSON catalog supporting all 6 ICA models. |
+| [`AGENTS.md`](AGENTS.md) | AI Coding Agents | `v2.3.0` | Root engineering rules, critical gotchas, and non-obvious project knowledge. |
+| [`RELEASE_NOTES.md`](RELEASE_NOTES.md) | All Developers / Audit | `v2.3.0` | Comprehensive version-wise changes, security assessments, and migration history. |
 
 ---
 

@@ -728,7 +728,7 @@
     <div class="badge-bar">
       <span class="badge ibm">IBM Consulting</span>
       <span class="badge ica">ICA 2.0 Integration</span>
-      <span class="badge guide">v2.2.0</span>
+      <span class="badge guide">v2.3.0</span>
       <span class="badge guide">Integration Toolkit</span>
     </div>
     <h1>IBM ICA (IBM Consulting Advantage) + Codex Integration Toolkit</h1>
@@ -838,6 +838,18 @@
             Installing it requires administrator privileges, so it must be installed manually, where approved by IBM policy (<a href="https://chatgpt.com/download/" target="_blank" style="color: #79c0ff;">https://chatgpt.com/download/</a>). The script only configures <code>~/.codex</code> so the desktop app can inherit the ICA settings once it is installed.
           </p>
         </div>
+
+        <!-- Codex Security (optional scanner) Info -->
+        <div class="callout" style="border-left: 4px solid #0f62fe; background: rgba(15, 98, 254, 0.08); margin-bottom: 20px;">
+          <strong style="color: #56c8ff;">ℹ️ Optional: Codex Security scanner (<code>@openai/codex-security</code>).</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            The script detects <code>codex-security</code> and, only if you opt in (the prompt defaults to <strong>No</strong>), installs it with npm. It never upgrades Node.js (needs 22.13+, 24.x or 26.x). When it is present, the script writes <code>~/.codex/codex-security.yaml</code> (no credentials; it only names <code>ICA_API_KEY</code>) and selects it through <code>CODEX_SECURITY_PROJECT_CONFIG</code> (a User environment variable on Windows, <code>~/.codex/.env</code> on macOS/Linux). An existing different value is never replaced without your approval. Config keys were tested against codex-security v0.10.0.
+          </p>
+          <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
+            <strong>A dry-run is not a completed scan.</strong> It only previews the ICA authentication and model selection. A real scan also needs the Codex Windows sandbox to start, which is a separate issue and may still stop at &ldquo;building threat model&rdquo;. See the README for details.
+          </p>
+        </div>
+
 
 
         <div class="callout success">
@@ -1166,6 +1178,13 @@ codex --version</pre>
                 <td>OpenAI Codex engine</td>
                 <td>
                   Run in terminal: <code>npm install -g @openai/codex</code>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Codex Security</strong> (optional)</td>
+                <td>Security scanner (needs Node.js 22.13+/24/26 and Python 3.10+)</td>
+                <td>
+                  Optional: <code>npm install -g @openai/codex-security</code> &mdash; offered by the setup script (default: No). Dry-run only previews the ICA selection; it does not prove a scan completes.
                 </td>
               </tr>
               <tr>

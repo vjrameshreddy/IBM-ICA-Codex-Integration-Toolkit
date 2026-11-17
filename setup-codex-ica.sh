@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for macOS / Linux
-# Version: 2.2.0
+# Version: 2.3.0
 # ==============================================================================
 
 set -e
@@ -140,7 +140,7 @@ prompt_file_action() {
 }
 
 echo -e "${CYAN}=================================================================${NC}"
-echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.2.0${NC}"
+echo -e "${WHITE}  IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.3.0${NC}"
 echo -e "${CYAN}  macOS / Linux Edition with Dry-Run Preview & Explicit Confirmation${NC}"
 echo -e "${CYAN}=================================================================${NC}"
 
@@ -157,7 +157,43 @@ MODEL_CATALOG_DIR="$CODEX_DIR/model-catalog"
 CATALOG_JSON_FILE="$MODEL_CATALOG_DIR/ica-models.json"
 CONFIG_FILE="$CODEX_DIR/config.toml"
 ENV_FILE="$CODEX_DIR/.env"
+SECURITY_CONFIG_FILE="$CODEX_DIR/codex-security.yaml"
 TEST_DIR="$HOME/codex-ica-test"
+
+# Codex Security project configuration (YAML). Contains NO credentials: it only names the ICA_API_KEY environment variable.
+# Keys tested against @openai/codex-security v0.10.0 (schema: project-config.schema.json).
+SECURITY_CONFIG_CONTENT='# codex-security project configuration for IBM Consulting Advantage (ICA).
+# Written by setup-codex-ica; keys tested against @openai/codex-security v0.10.0.
+# Contains NO credentials: the key is read from the ICA_API_KEY environment variable.
+auth: api-key
+codex:
+  model: gpt-advantage-assist
+  model_provider: ica
+  model_providers:
+    ica:
+      name: ICA
+      base_url: https://api.servicesessentials.ibm.com/v1
+      wire_api: responses
+      env_key: ICA_API_KEY'
+
+# Installed codex-security version (empty if missing)
+get_security_version() {
+  if command -v codex-security >/dev/null 2>&1; then
+    codex-security --version 2>/dev/null | head -n 1 | tr -d '\r' || true
+  fi
+}
+
+# @openai/codex-security (v0.10.0) requires Node.js ^22.13.0 || ^24.0.0 || ^26.0.0
+node_ok_for_security() {
+  local v="${1#v}"
+  local major="${v%%.*}"
+  local rest="${v#*.}"
+  local minor="${rest%%.*}"
+  [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ ]] || return 1
+  if [ "$major" -eq 22 ] && [ "$minor" -ge 13 ]; then return 0; fi
+  if [ "$major" -eq 24 ] || [ "$major" -eq 26 ]; then return 0; fi
+  return 1
+}
 
 # 1. Check Prerequisites
 echo -e "\n${CYAN}[+] Inspecting current system environment...${NC}"
@@ -184,6 +220,13 @@ check_cmd "Python 3" "python3"
 check_cmd "VS Code" "code" "IBMers: Install via official 'Mac@IBM' internal software catalog"
 check_cmd "Codex CLI" "codex"
 
+SECURITY_VER="$(get_security_version)"
+if [ -n "$SECURITY_VER" ]; then
+    echo -e " ${GREEN}[OK]${NC} Codex Security found: $SECURITY_VER"
+else
+    echo -e " [INFO] Codex Security (@openai/codex-security) is not installed (optional scanner)."
+fi
+
 # Missing prerequisites installable via Homebrew.
 # VS Code is intentionally excluded: IBM-managed machines must install it via Mac@IBM.
 MISSING_BREW=()
@@ -195,6 +238,7 @@ command -v python3 >/dev/null 2>&1 || MISSING_BREW+=(python)
 has_catalog=false; [ -f "$CATALOG_JSON_FILE" ] && has_catalog=true
 has_config=false; [ -f "$CONFIG_FILE" ] && has_config=true
 has_env=false; [ -f "$ENV_FILE" ] && has_env=true
+has_security_config=false; [ -f "$SECURITY_CONFIG_FILE" ] && has_security_config=true
 has_testdir=false; [ -d "$TEST_DIR" ] && has_testdir=true
 
 has_chatgpt_app=false
@@ -218,6 +262,24 @@ echo -e "      Will write 6 ICA models (gpt-advantage-assist, gpt-5.6-sol, etc.)
 echo -e "    - Codex Config ($CONFIG_FILE):"
 echo -e "      Will $([ "$has_config" = true ] && echo 'merge with existing config [Auto-Backup offered]' || echo 'create new config') placing top-level ICA settings at top."
 
+echo -e "    - Codex Security Config ($SECURITY_CONFIG_FILE):"
+if [ -n "$SECURITY_VER" ]; then
+    echo -e "      Will $([ "$has_security_config" = true ] && echo 'update existing config [Auto-Backup offered]' || echo 'create new config') (UTF-8, no credentials; auth: api-key, env_key: ICA_API_KEY)."
+    existing_sel="${CODEX_SECURITY_PROJECT_CONFIG:-}"
+    if [ -z "$existing_sel" ] && [ -f "$ENV_FILE" ]; then
+        existing_sel=$(grep -E '^(export[[:space:]]+)?CODEX_SECURITY_PROJECT_CONFIG=' "$ENV_FILE" | tail -n 1 | cut -d '=' -f2- | tr -d '"' || true)
+    fi
+    if [ -z "$existing_sel" ]; then
+        echo -e "      Will add CODEX_SECURITY_PROJECT_CONFIG=$SECURITY_CONFIG_FILE to $ENV_FILE."
+    elif [ "$existing_sel" != "$SECURITY_CONFIG_FILE" ]; then
+        echo -e "      ${YELLOW}CONFLICT: CODEX_SECURITY_PROJECT_CONFIG already points to $existing_sel - will ask before replacing it.${NC}"
+    else
+        echo -e "      CODEX_SECURITY_PROJECT_CONFIG already points to this file."
+    fi
+else
+    echo -e "      Only written if codex-security is installed (optional install prompt defaults to No)."
+fi
+
 echo -e "\n${WHITE} 3. Secret & Environment Management:${NC}"
 echo -e "    - Secret File : $ENV_FILE (Will store ICA_API_KEY with chmod 600 permissions$([ "$has_env" = true ] && echo ', Auto-Backup offered'))"
 
@@ -235,6 +297,11 @@ if ! command -v codex >/dev/null 2>&1; then
 else
     echo -e "    - Software    : Codex CLI already installed"
 fi
+if [ -n "$SECURITY_VER" ]; then
+    echo -e "    - Codex Security: Already installed ($SECURITY_VER)"
+else
+    echo -e "    - Codex Security: Optional - will ask before installing @openai/codex-security (default: No; needs Node.js 22.13+/24/26, Node is never upgraded automatically)"
+fi
 if [ "$has_chatgpt_app" = true ]; then
     echo -e "    - ChatGPT App : Desktop app detected (Will inherit ICA config automatically)"
 else
@@ -244,7 +311,11 @@ echo -e "${YELLOW}+-------------------------------------------------------------
 
 if [ "$DRY_RUN" = true ]; then
     echo -e "${CYAN}[DRY-RUN MODE ACTIVATED] Execution plan validated.${NC}"
-    echo -e "${GREEN}[DRY-RUN] No changes were made to your system. To apply these changes, run without --dry-run.${NC}\n"
+    echo -e "\n--- codex-security.yaml Preview (no credentials) ---"
+    echo "$SECURITY_CONFIG_CONTENT"
+    echo -e "--- End codex-security.yaml Preview ---\n"
+    echo -e "${GREEN}[DRY-RUN] No changes were made to your system. To apply these changes, run without --dry-run.${NC}"
+    echo -e "[DRY-RUN] This is a preview only. It is not a completed setup, and a codex-security dry-run never proves that a scan completes.\n"
     exit 0
 fi
 
@@ -642,6 +713,91 @@ else
     echo -e " ${YELLOW}[WARN]${NC} No API key entered. You can add it manually to $ENV_FILE."
 fi
 
+# 8b. Codex Security (optional scanner): install (opt-in) + project configuration
+echo -e "\n${CYAN}[+] Codex Security (optional scanner)...${NC}"
+SECURITY_CONFIGURED=false
+
+if [ -z "$SECURITY_VER" ]; then
+    if ! command -v npm >/dev/null 2>&1; then
+        echo -e " ${YELLOW}[WARN]${NC} npm is not available, so codex-security cannot be installed. Install Node.js LTS first, then re-run this script."
+    else
+        NODE_NOW="$(node -v 2>/dev/null || true)"
+        if ! node_ok_for_security "$NODE_NOW"; then
+            echo -e " ${YELLOW}[WARN]${NC} codex-security requires Node.js 22.13+, 24.x or 26.x (found: ${NODE_NOW:-none}). Node.js is NOT upgraded automatically; skipping codex-security installation."
+        elif ask_approval "Install the optional codex-security scanner globally via npm (@openai/codex-security)? It needs Node.js and Python 3.10+." false; then
+            echo "Running: npm install -g @openai/codex-security@latest"
+            if npm install -g @openai/codex-security@latest; then
+                export PATH="$(npm config get prefix)/bin:$PATH"
+                hash -r
+                SECURITY_VER="$(get_security_version)"
+                if [ -n "$SECURITY_VER" ]; then
+                    echo -e " ${GREEN}[OK]${NC} codex-security installed: $SECURITY_VER"
+                else
+                    echo -e " ${YELLOW}[WARN]${NC} codex-security was installed but is not on PATH yet. Open a new terminal and re-run this script to configure it."
+                fi
+            else
+                echo -e " ${RED}[ERROR]${NC} Failed to install codex-security. Please check your npm permissions."
+            fi
+        else
+            echo -e " [SKIP] codex-security installation not selected (optional). Re-run this script later to add it."
+        fi
+    fi
+fi
+
+if [ -n "$SECURITY_VER" ]; then
+    # Project configuration file. Contains NO credentials: it only names the ICA_API_KEY environment variable.
+    security_action=$(prompt_file_action "$SECURITY_CONFIG_FILE" "Codex Security project config (codex-security.yaml)")
+    if [ "$security_action" = "backup_and_update" ]; then
+        backup_file "$SECURITY_CONFIG_FILE" "codex-security.yaml"
+    fi
+    if [ "$security_action" != "skip" ]; then
+        printf '%s\n' "$SECURITY_CONFIG_CONTENT" > "$SECURITY_CONFIG_FILE"
+        echo -e " ${GREEN}[OK]${NC} codex-security.yaml written (UTF-8, no credentials)."
+        SECURITY_CONFIGURED=true
+    else
+        echo -e " ${YELLOW}[WARN]${NC} Skipped modifying codex-security.yaml as requested."
+        [ -f "$SECURITY_CONFIG_FILE" ] && SECURITY_CONFIGURED=true
+    fi
+
+    # Select the file for plain 'codex-security scan' via ~/.codex/.env. Never replace a different value silently.
+    if [ "$SECURITY_CONFIGURED" = true ]; then
+        current_sel=""
+        if [ -f "$ENV_FILE" ]; then
+            current_sel=$(grep -E '^(export[[:space:]]+)?CODEX_SECURITY_PROJECT_CONFIG=' "$ENV_FILE" | tail -n 1 | cut -d '=' -f2- | tr -d '"' || true)
+        fi
+        [ -z "$current_sel" ] && current_sel="${CODEX_SECURITY_PROJECT_CONFIG:-}"
+
+        write_selection=false
+        if [ -z "$current_sel" ]; then
+            write_selection=true
+        elif [ "$current_sel" = "$SECURITY_CONFIG_FILE" ]; then
+            echo -e " ${GREEN}[OK]${NC} CODEX_SECURITY_PROJECT_CONFIG already points to $SECURITY_CONFIG_FILE."
+        else
+            echo -e " ${YELLOW}[WARN]${NC} CODEX_SECURITY_PROJECT_CONFIG already points somewhere else:"
+            echo -e "      current : $current_sel"
+            echo -e "      proposed: $SECURITY_CONFIG_FILE"
+            if ask_approval "Replace the existing CODEX_SECURITY_PROJECT_CONFIG value with the ICA config?" false; then
+                write_selection=true
+            else
+                echo -e " ${YELLOW}[WARN]${NC} Kept your existing CODEX_SECURITY_PROJECT_CONFIG. Use the ICA config explicitly with: codex-security scan . -c \"$SECURITY_CONFIG_FILE\""
+            fi
+        fi
+
+        if [ "$write_selection" = true ]; then
+            if [ -f "$ENV_FILE" ]; then
+                backup_file "$ENV_FILE" ".env (secret)" true
+                # The temp copy holds the API key: create it owner-only from the start
+                ( umask 077; grep -v -E '^(export[[:space:]]+)?CODEX_SECURITY_PROJECT_CONFIG=' "$ENV_FILE" > "$ENV_FILE.tmp" || true )
+                mv "$ENV_FILE.tmp" "$ENV_FILE"
+            fi
+            echo "CODEX_SECURITY_PROJECT_CONFIG=$SECURITY_CONFIG_FILE" >> "$ENV_FILE"
+            chmod 600 "$ENV_FILE"
+            export CODEX_SECURITY_PROJECT_CONFIG="$SECURITY_CONFIG_FILE"
+            echo -e " ${GREEN}[OK]${NC} CODEX_SECURITY_PROJECT_CONFIG=$SECURITY_CONFIG_FILE saved to $ENV_FILE."
+        fi
+    fi
+fi
+
 # 9. Summary
 echo -e "\n${GREEN}=================================================================${NC}"
 echo -e "${WHITE}           IBM ICA + Codex Setup Completed Successfully!         ${NC}"
@@ -650,14 +806,24 @@ echo -e "Configuration files:"
 echo " - Model Catalog:  $CATALOG_JSON_FILE"
 echo " - Codex Config:   $CONFIG_FILE"
 echo " - API Key:        $ENV_FILE"
+if [ "$SECURITY_CONFIGURED" = true ]; then
+    echo " - Codex Security: $SECURITY_CONFIG_FILE"
+fi
 echo " - Test Directory: $TEST_DIR"
 echo ""
 echo -e "${YELLOW}Next Steps to Verify:${NC}"
 echo " 1. Restart your terminal session or run: source ~/.zshrc"
 echo " 2. cd \"$TEST_DIR\" && codex"
 echo " 3. Inside Codex, verify with: /status"
+if [ "$SECURITY_CONFIGURED" = true ]; then
+    echo " 4. Codex Security (optional scanner) - load ~/.codex/.env in a NEW terminal so CODEX_SECURITY_PROJECT_CONFIG is set:"
+    echo "      set -a; . \"$ENV_FILE\"; set +a; codex-security scan . --dry-run"
+    echo "    NOTE: this only previews the ICA authentication/model selection. It is NOT a completed scan."
+    echo "    A real scan also needs the Codex sandbox to start, which is a separate issue; see the README for details."
+fi
 if [ "$has_chatgpt_app" = false ]; then
-    echo " 4. ChatGPT Desktop App (optional): install it manually (requires administrator privileges):"
+    if [ "$SECURITY_CONFIGURED" = true ]; then chatgpt_step=5; else chatgpt_step=4; fi
+    echo " $chatgpt_step. ChatGPT Desktop App (optional): install it manually (requires administrator privileges):"
     echo "    - https://chatgpt.com/download/ (only where approved by IBM policy)"
 fi
 echo -e "${GREEN}=================================================================${NC}\n"

@@ -1,6 +1,6 @@
 # ==============================================================================
 # IBM ICA (IBM Consulting Advantage) + Codex Automated Setup Script for Windows
-# Version: 2.2.0
+# Version: 2.3.0
 # ==============================================================================
 [CmdletBinding()]
 param(
@@ -120,8 +120,24 @@ function Prompt-FileAction {
     }
 }
 
+function Get-CodexSecurityVersion {
+    try {
+        $out = & codex-security --version 2>$null
+        if ($LASTEXITCODE -eq 0 -and $out) { return ("$out").Trim() }
+    } catch {}
+    return $null
+}
+
+# @openai/codex-security (v0.10.0) requires Node.js ^22.13.0 || ^24.0.0 || ^26.0.0
+function Test-NodeForCodexSecurity {
+    param([string]$NodeVersion)
+    if ($NodeVersion -notmatch '^v?(\d+)\.(\d+)') { return $false }
+    $major = [int]$Matches[1]; $minor = [int]$Matches[2]
+    return (($major -eq 22 -and $minor -ge 13) -or $major -eq 24 -or $major -eq 26)
+}
+
 Clear-Host
-Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.2.0" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
+Write-HeaderBox "IBM ICA (IBM Consulting Advantage) + Codex Setup Tool v2.3.0" "Windows Edition with Dry-Run Preview & Explicit Confirmation"
 
 Write-Host "[INFO] ChatGPT Desktop App is not installed by the automated setup." -ForegroundColor Cyan
 Write-Host "       Installing it requires administrator privileges, so it must be installed manually," -ForegroundColor Cyan
@@ -137,6 +153,7 @@ $ModelCatalogDir = Join-Path $CodexDir "model-catalog"
 $CatalogJsonFile = Join-Path $ModelCatalogDir "ica-models.json"
 $ConfigFile = Join-Path $CodexDir "config.toml"
 $EnvFile = Join-Path $CodexDir ".env"
+$SecurityConfigFile = Join-Path $CodexDir "codex-security.yaml"
 $TestDir = Join-Path $HOME "codex-ica-test"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
@@ -189,6 +206,14 @@ try {
 
 if (-not $CodexVer) {
     Write-WarningMsg "Codex CLI (@openai/codex) is not currently installed."
+}
+
+# Check Codex Security (optional scanner)
+$SecurityVer = Get-CodexSecurityVersion
+if ($SecurityVer) {
+    Write-Success "Codex Security found: $SecurityVer"
+} else {
+    Write-Host " [INFO] Codex Security (@openai/codex-security) is not installed (optional scanner)." -ForegroundColor DarkGray
 }
 
 # Missing prerequisites that can be installed automatically via winget.
@@ -448,6 +473,26 @@ $ModelCatalogContent = @'
 }
 '@
 
+# Codex Security project configuration (YAML). Contains NO credentials: it only names the ICA_API_KEY environment variable.
+# Keys tested against @openai/codex-security v0.10.0 (schema: project-config.schema.json).
+$SecurityConfigContent = @'
+# codex-security project configuration for IBM Consulting Advantage (ICA).
+# Written by setup-codex-ica; keys tested against @openai/codex-security v0.10.0.
+# Contains NO credentials: the key is read from the ICA_API_KEY environment variable.
+auth: api-key
+codex:
+  model: gpt-advantage-assist
+  model_provider: ica
+  model_providers:
+    ica:
+      name: ICA
+      base_url: https://api.servicesessentials.ibm.com/v1
+      wire_api: responses
+      env_key: ICA_API_KEY
+'@
+$SecurityConfigContent = $SecurityConfigContent -replace "`r`n", "`n"
+$HasSecurityConfig = Test-Path $SecurityConfigFile
+
 # 4. Compute Merged config.toml Content
 $EscapedCatalogPath = $CatalogJsonFile.Replace('\', '\\')
 
@@ -508,6 +553,21 @@ Write-Host "      Will write 6 ICA models (gpt-advantage-assist, gpt-5.6-sol, et
 Write-Host "    - Codex Config ($ConfigFile):" -ForegroundColor Gray
 Write-Host "      Will $(if ($HasConfig) { 'merge with existing config [Auto-Backup offered]' } else { 'create new config' }) placing top-level ICA settings at top." -ForegroundColor DarkGray
 
+Write-Host "    - Codex Security Config ($SecurityConfigFile):" -ForegroundColor Gray
+if ($SecurityVer) {
+    Write-Host "      Will $(if ($HasSecurityConfig) { 'update existing config [Auto-Backup offered]' } else { 'create new config' }) (UTF-8 without BOM, no credentials; auth: api-key, env_key: ICA_API_KEY)." -ForegroundColor DarkGray
+    $existingSel = [System.Environment]::GetEnvironmentVariable('CODEX_SECURITY_PROJECT_CONFIG', 'User')
+    if ([string]::IsNullOrWhiteSpace($existingSel)) {
+        Write-Host "      Will set User env var CODEX_SECURITY_PROJECT_CONFIG to this file." -ForegroundColor DarkGray
+    } elseif ($existingSel -ne $SecurityConfigFile) {
+        Write-Host "      CONFLICT: CODEX_SECURITY_PROJECT_CONFIG already points to $existingSel - will ask before replacing it." -ForegroundColor Yellow
+    } else {
+        Write-Host "      CODEX_SECURITY_PROJECT_CONFIG already points to this file." -ForegroundColor DarkGray
+    }
+} else {
+    Write-Host "      Only written if codex-security is installed (optional install prompt defaults to No)." -ForegroundColor DarkGray
+}
+
 Write-Host "`n 3. Secret & Environment Management:" -ForegroundColor White
 Write-Host "    - Secret File : $EnvFile (Will store ICA_API_KEY with owner-only NTFS permissions$(if ($HasEnv) { ', Auto-Backup offered' }))" -ForegroundColor Gray
 Write-Host "    - Environment : Will register ICA_API_KEY in Windows User Environment variables" -ForegroundColor Gray
@@ -525,6 +585,11 @@ if (-not $CodexVer) {
     Write-Host "    - Software    : Will offer to install @openai/codex globally via npm" -ForegroundColor Yellow
 } else {
     Write-Host "    - Software    : Codex CLI already installed ($CodexVer)" -ForegroundColor Gray
+}
+if ($SecurityVer) {
+    Write-Host "    - Codex Security: Already installed ($SecurityVer)" -ForegroundColor Gray
+} else {
+    Write-Host "    - Codex Security: Optional - will ask before installing @openai/codex-security (default: No; needs Node.js 22.13+/24/26, Node is never upgraded automatically)" -ForegroundColor Yellow
 }
 if ($HasChatGPTDesktop) {
     Write-Host "    - ChatGPT App : Desktop app detected (Will inherit ICA config automatically)" -ForegroundColor Gray
@@ -546,7 +611,12 @@ if ($DryRun) {
     Write-Host $FinalConfigContent -ForegroundColor Gray
     Write-Host "--- End config.toml Preview ---`n" -ForegroundColor DarkCyan
 
+    Write-Host "`n--- codex-security.yaml Preview (no credentials) ---" -ForegroundColor DarkCyan
+    Write-Host $SecurityConfigContent -ForegroundColor Gray
+    Write-Host "--- End codex-security.yaml Preview ---`n" -ForegroundColor DarkCyan
+
     Write-Host "[DRY-RUN] No changes were made to your system. To apply these changes, run without -DryRun." -ForegroundColor Green
+    Write-Host "[DRY-RUN] This is a preview only. It is not a completed setup, and a codex-security dry-run never proves that a scan completes." -ForegroundColor DarkGray
     exit 0
 }
 
@@ -762,6 +832,78 @@ if ($SkipKeyPrompt) {
 }
 
 # ------------------------------------------------------------------------------
+# STEP 5b: Codex Security (optional scanner): install (opt-in) + project configuration
+# ------------------------------------------------------------------------------
+$SecurityConfigured = $false
+Write-Step "Codex Security (optional scanner)..."
+
+if (-not $SecurityVer) {
+    if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Write-WarningMsg "npm is not available, so codex-security cannot be installed. Install Node.js LTS first, then re-run this script."
+    } else {
+        $NodeNow = $null
+        try { $NodeNow = (& node -v 2>$null) } catch {}
+        if (-not (Test-NodeForCodexSecurity $NodeNow)) {
+            Write-WarningMsg "codex-security requires Node.js 22.13+, 24.x or 26.x (found: $(if ($NodeNow) { $NodeNow } else { 'none' })). Node.js is NOT upgraded automatically; skipping codex-security installation."
+        } else {
+            if (Ask-UserApproval "Install the optional codex-security scanner globally via npm (@openai/codex-security)? It needs Node.js and Python 3.10+." $false) {
+                Write-Step "Installing @openai/codex-security globally via npm..."
+                npm install -g @openai/codex-security@latest
+                if ($LASTEXITCODE -eq 0) {
+                    $SecurityVer = Get-CodexSecurityVersion
+                    if ($SecurityVer) { Write-Success "codex-security installed: $SecurityVer" }
+                    else { Write-WarningMsg "codex-security was installed but is not on PATH yet. Open a new terminal and re-run this script to configure it." }
+                } else {
+                    Write-ErrorMsg "Failed to install codex-security. Please check your npm permissions."
+                }
+            } else {
+                Write-Host " [SKIP] codex-security installation not selected (optional). Re-run this script later to add it." -ForegroundColor DarkGray
+            }
+        }
+    }
+}
+
+if ($SecurityVer) {
+    # Project configuration file. Contains NO credentials: it only names the ICA_API_KEY environment variable.
+    $securityAction = Prompt-FileAction $SecurityConfigFile "Codex Security project config (codex-security.yaml)"
+    if ($securityAction -eq "BackupAndUpdate") {
+        Backup-ConfigFile $SecurityConfigFile "codex-security.yaml"
+    }
+    if ($securityAction -ne "Skip") {
+        [System.IO.File]::WriteAllText($SecurityConfigFile, $SecurityConfigContent, $Utf8NoBom)
+        Write-Success "codex-security.yaml written (UTF-8 without BOM, no credentials)."
+        $SecurityConfigured = $true
+    } else {
+        Write-WarningMsg "Skipped modifying codex-security.yaml as requested."
+        $SecurityConfigured = Test-Path $SecurityConfigFile
+    }
+
+    # Select the file for plain 'codex-security scan' via a User environment variable. Never replace a different value silently.
+    if ($SecurityConfigured) {
+        $currentSelection = [System.Environment]::GetEnvironmentVariable('CODEX_SECURITY_PROJECT_CONFIG', 'User')
+        if ([string]::IsNullOrWhiteSpace($currentSelection)) {
+            [System.Environment]::SetEnvironmentVariable('CODEX_SECURITY_PROJECT_CONFIG', $SecurityConfigFile, 'User')
+            $env:CODEX_SECURITY_PROJECT_CONFIG = $SecurityConfigFile
+            Write-Success "Registered CODEX_SECURITY_PROJECT_CONFIG user environment variable -> $SecurityConfigFile"
+        } elseif ($currentSelection -eq $SecurityConfigFile) {
+            Write-Success "CODEX_SECURITY_PROJECT_CONFIG already points to $SecurityConfigFile."
+        } else {
+            Write-WarningMsg "CODEX_SECURITY_PROJECT_CONFIG already points somewhere else:"
+            Write-Host "      current : $currentSelection" -ForegroundColor Yellow
+            Write-Host "      proposed: $SecurityConfigFile" -ForegroundColor Cyan
+            if (Ask-UserApproval "Replace the existing CODEX_SECURITY_PROJECT_CONFIG value with the ICA config?" $false) {
+                [System.Environment]::SetEnvironmentVariable('CODEX_SECURITY_PROJECT_CONFIG', $SecurityConfigFile, 'User')
+                $env:CODEX_SECURITY_PROJECT_CONFIG = $SecurityConfigFile
+                Write-Success "CODEX_SECURITY_PROJECT_CONFIG updated."
+            } else {
+                Write-WarningMsg "Kept your existing CODEX_SECURITY_PROJECT_CONFIG. Use the ICA config explicitly with: codex-security scan . -c `"$SecurityConfigFile`""
+            }
+        }
+    }
+}
+
+
+# ------------------------------------------------------------------------------
 # STEP 6: Process Management (Terminate Stale Daemons with Confirmation)
 # ------------------------------------------------------------------------------
 if ($RunningDaemons.Count -gt 0) {
@@ -786,6 +928,9 @@ Write-Host "Configuration files:" -ForegroundColor Cyan
 Write-Host " - Model Catalog:  $CatalogJsonFile" -ForegroundColor Gray
 Write-Host " - Codex Config:   $ConfigFile" -ForegroundColor Gray
 Write-Host " - API Key:        $EnvFile" -ForegroundColor Gray
+if ($SecurityConfigured) {
+    Write-Host " - Codex Security: $SecurityConfigFile" -ForegroundColor Gray
+}
 Write-Host " - Test Directory: $TestDir" -ForegroundColor Gray
 
 Write-Host "`nNext Steps to Verify:" -ForegroundColor Yellow
@@ -801,8 +946,15 @@ Write-Host " 3. For Visual Studio Code:" -ForegroundColor White
 Write-Host "    - Install 'Codex - OpenAI''s coding agent' (OpenAI.chatgpt) extension." -ForegroundColor Gray
 Write-Host "    - Open folder: `"$TestDir`" and click Trust." -ForegroundColor Gray
 Write-Host "    - Open the Codex tab to start coding with ICA!" -ForegroundColor Gray
+if ($SecurityConfigured) {
+    Write-Host " 4. Codex Security (optional scanner) - open a NEW terminal first so CODEX_SECURITY_PROJECT_CONFIG is loaded:" -ForegroundColor White
+    Write-Host "      codex-security scan . --dry-run" -ForegroundColor Cyan
+    Write-Host "    NOTE: this only previews the ICA authentication/model selection. It is NOT a completed scan." -ForegroundColor Yellow
+    Write-Host "    A real scan also needs the Codex Windows sandbox to start; on some machines it stops at" -ForegroundColor Yellow
+    Write-Host "    'building threat model' (a separate, unresolved issue). See the README for details." -ForegroundColor Yellow
+}
 if (-not $HasChatGPTDesktop) {
-    Write-Host " 4. ChatGPT Desktop App (optional): install it manually (requires administrator privileges):" -ForegroundColor White
+    Write-Host " $(if ($SecurityConfigured) { 5 } else { 4 }). ChatGPT Desktop App (optional): install it manually (requires administrator privileges):" -ForegroundColor White
     Write-Host "    - https://chatgpt.com/download/ (only where approved by IBM policy)" -ForegroundColor Gray
 }
 Write-Host "=================================================================`n" -ForegroundColor Green
