@@ -114,15 +114,15 @@ Open PowerShell or Terminal and run:
 - **Windows (PowerShell)**:
   ```powershell
   $env:ICA_API_KEY = [System.Environment]::GetEnvironmentVariable('ICA_API_KEY', 'User')
-  New-Item -ItemType Directory -Force "$HOME\IBM ICA-Codex-Integration-Toolkit" | Out-Null
-  cd "$HOME\IBM ICA-Codex-Integration-Toolkit"
+  New-Item -ItemType Directory -Force "$HOME\codex-ica-test" | Out-Null
+  cd "$HOME\codex-ica-test"
   codex
   ```
 
 - **macOS / Linux (Terminal)**:
   ```bash
-  mkdir -p "$HOME/IBM ICA-Codex-Integration-Toolkit"
-  cd "$HOME/IBM ICA-Codex-Integration-Toolkit"
+  mkdir -p "$HOME/codex-ica-test"
+  cd "$HOME/codex-ica-test"
   codex
   ```
 1. Type `/status` &rarr; verify **`provider: ica`** and **`model: gpt-advantage-assist`**.
@@ -133,7 +133,7 @@ Open PowerShell or Terminal and run:
 3. Type `/exit` to close.
 
 #### 5.2 VS Code Coding Agent Validation
-1. Open **Visual Studio Code** on `~/IBM ICA-Codex-Integration-Toolkit`.
+1. Open **Visual Studio Code** on `~/codex-ica-test`.
 2. Open the **Codex icon** in the left Activity Bar.
 3. Run the coding verification prompt:
    ```text
@@ -142,7 +142,7 @@ Open PowerShell or Terminal and run:
 4. Verify by running: `python hello.py`.
 
 #### 5.3 ChatGPT Desktop App Integration
-1. Open a Codex conversation in the desktop app on your `~/IBM ICA-Codex-Integration-Toolkit` workspace.
+1. Open a Codex conversation in the desktop app on your `~/codex-ica-test` workspace.
 2. Send test prompt: `Say hello in one sentence. Do not create or modify any files.`
 3. A successful response confirms the desktop app is using ICA credentials.
 
@@ -248,7 +248,9 @@ failed to prepare Windows sandbox ... orchestrator_helper_exit_nonzero: setup he
 
 ## 🧹 Uninstallation & Fresh Reinstall
 
-If you need to perform a clean reinstall, reset misconfigured settings, or completely remove Codex CLI and ICA configuration, run the automated uninstaller. It prompts for explicit user confirmation before taking any action and offers an automatic backup of your existing `~/.codex` directory.
+If you need to perform a clean reinstall, reset misconfigured settings, or completely remove Codex CLI and ICA configuration, run the automated uninstaller. It asks for one overall confirmation (default No) and then asks again for each item it removes: background daemons, each global npm package, `~/.codex` (with an owner-only backup offer), each User environment variable, the `~/codex-ica-test` workspace, and, on macOS/Linux, the npm user prefix and the `~/.zshrc` PATH line added by the setup.
+
+Prerequisites that the setup can install (Git, GitHub CLI, Node.js, Python) are offered for removal last, one by one, with a default of No. `-Yes` / `--yes` never approve them, because they may predate the setup or be used by other software. ChatGPT Desktop and VS Code are never touched.
 
 ```powershell
 # Windows (PowerShell)

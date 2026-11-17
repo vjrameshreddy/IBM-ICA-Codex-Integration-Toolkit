@@ -154,7 +154,7 @@ $CatalogJsonFile = Join-Path $ModelCatalogDir "ica-models.json"
 $ConfigFile = Join-Path $CodexDir "config.toml"
 $EnvFile = Join-Path $CodexDir ".env"
 $SecurityConfigFile = Join-Path $CodexDir "codex-security.yaml"
-$TestDir = Join-Path $HOME "IBM ICA-Codex-Integration-Toolkit"
+$TestDir = Join-Path $HOME "codex-ica-test"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # 2. Check Prerequisites

@@ -14,7 +14,7 @@ Run from the repo root. There is no unit-test runner, so the "single test" is a 
 - PowerShell syntax check (run in PowerShell, repeat for each `.ps1`): `$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path .\setup-codex-ica.ps1).Path,[ref]$null,[ref]$e); $e.Count`. The result must be `0`.
 - Bash syntax check: `bash -n ./setup-codex-ica.sh` (also `./uninstall-codex-ica.sh`)
 - Catalog JSON check: `python -m json.tool .\ica-models.json`
-- Live single prompt: `cd "$HOME\IBM ICA-Codex-Integration-Toolkit"; codex exec "Say hello in one sentence. Do not create or modify any files."`
+- Live single prompt: `cd "$HOME\codex-ica-test"; codex exec "Say hello in one sentence. Do not create or modify any files."`
 
 ## Code style
 

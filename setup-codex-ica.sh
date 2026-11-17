@@ -158,7 +158,7 @@ CATALOG_JSON_FILE="$MODEL_CATALOG_DIR/ica-models.json"
 CONFIG_FILE="$CODEX_DIR/config.toml"
 ENV_FILE="$CODEX_DIR/.env"
 SECURITY_CONFIG_FILE="$CODEX_DIR/codex-security.yaml"
-TEST_DIR="$HOME/IBM ICA-Codex-Integration-Toolkit"
+TEST_DIR="$HOME/codex-ica-test"
 
 # Codex Security project configuration (YAML). Contains NO credentials: it only names the ICA_API_KEY environment variable.
 # Keys tested against @openai/codex-security v0.10.0 (schema: project-config.schema.json).
