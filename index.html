@@ -846,7 +846,7 @@
             The script detects <code>codex-security</code> and, only if you opt in (the prompt defaults to <strong>No</strong>), installs it with npm. It never upgrades Node.js (needs 22.13+, 24.x or 26.x). When it is present, the script writes <code>~/.codex/codex-security.yaml</code> (no credentials; it only names <code>ICA_API_KEY</code>) and selects it through <code>CODEX_SECURITY_PROJECT_CONFIG</code> (a User environment variable on Windows, <code>~/.codex/.env</code> on macOS/Linux). An existing different value is never replaced without your approval. Config keys were tested against codex-security v0.10.0.
           </p>
           <p style="margin: 6px 0 0 0; font-size: 0.92rem; color: var(--text-main);">
-            <strong>A dry-run is not a completed scan.</strong> It only previews the ICA authentication and model selection. A real scan also needs the Codex Windows sandbox to start, which is a separate issue and may still stop at &ldquo;building threat model&rdquo;. See the README for details.
+            <strong>A dry-run is not a completed scan.</strong> It only previews the ICA authentication and model selection. A real scan also needs the Codex Windows sandbox to start, which is a separate issue and may still stop at &ldquo;building threat model&rdquo; on native Windows. A scan did complete from WSL2; see &ldquo;Scanning from WSL&rdquo; in the Troubleshooting tab and the README.
           </p>
         </div>
 
@@ -1595,6 +1595,56 @@ codex</pre>
             </p>
           </div>
         </div>
+
+        <!-- Issue: Scanning from WSL (Windows sandbox workaround) -->
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>🐧 Scanning from WSL (codex-security fails on Windows: &ldquo;failed to prepare windows sandbox wrapper&rdquo;)</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>On native Windows, <code>codex-security</code> authenticates through ICA but a real scan can stop at &ldquo;building threat model&rdquo; with <code>failed to prepare windows sandbox wrapper: orchestrator_helper_exit_nonzero</code>. Likely cause: the Codex/ChatGPT desktop app owns the machine-wide Windows sandbox service and accounts, so the scanner&rsquo;s own sandbox setup is refused. A full scan completed through ICA from <strong>WSL2</strong> (Ubuntu 26.04, Node.js v22.22.1, <code>@openai/codex-security</code> 0.10.1). This was tested on a single machine only; it is not verified elsewhere.</p>
+            <p><strong>Prerequisites:</strong> WSL2 with a Linux user that has <code>sudo</code>; <strong>Linux-native</strong> Node.js <code>^22.13 || ^24 || ^26</code> and npm (Windows copies under <code>/mnt/c/...</code> do not count; <code>command -v node npm</code> must print <code>/usr/bin/...</code>); your <code>ICA_API_KEY</code>; and the repository to scan cloned onto the Linux filesystem (<code>~/...</code>, not <code>/mnt/c/...</code>; a clone has committed files only). Run these inside the WSL shell:</p>
+            <div class="code-container">
+              <div class="code-header">
+                <span>WSL (Ubuntu) shell</span>
+                <button class="copy-btn" onclick="copyCode('faq-wsl-setup')">📋 Copy</button>
+              </div>
+              <pre id="faq-wsl-setup"># 1. Linux-native Node.js and npm
+sudo apt update &amp;&amp; sudo apt install -y nodejs npm
+command -v node npm          # must be /usr/bin/node and /usr/bin/npm
+node --version               # must satisfy ^22.13 || ^24 || ^26
+
+# 2. Get the toolkit and run the setup (dry-run first)
+git clone https://github.com/vjrameshreddy/IBM-ICA-Codex-Integration-Toolkit.git ~/ica-toolkit
+cd ~/ica-toolkit
+bash ./setup-codex-ica.sh --dry-run
+bash ./setup-codex-ica.sh    # answer Yes to the optional codex-security install
+
+# 3. Put the npm global bin on PATH
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' &gt;&gt; ~/.bashrc
+export PATH="$HOME/.npm-global/bin:$PATH"</pre>
+            </div>
+            <div class="code-container">
+              <div class="code-header">
+                <span>WSL (Ubuntu) shell - scan</span>
+                <button class="copy-btn" onclick="copyCode('faq-wsl-scan')">📋 Copy</button>
+              </div>
+              <pre id="faq-wsl-scan"># Clone the repository to scan onto the Linux filesystem
+git clone &lt;repo-url&gt; ~/my-repo
+
+# Load the ICA key and scan
+set -a; . ~/.codex/.env; set +a
+codex-security scan ~/my-repo --dry-run   # preview only, sends nothing
+codex-security scan ~/my-repo             # real scan: sends repository content to ICA</pre>
+            </div>
+            <p><strong>Where results are:</strong> <code>~/.codex/state/plugins/codex-security/scans/&lt;repo-name&gt;/&lt;scan-folder&gt;/</code> containing <code>report.md</code>, <code>threatmodel.md</code>, <code>findings.json</code> and <code>scan-manifest.json</code>. Use <code>codex-security scans show &lt;scan-id&gt;</code> and <code>codex-security scans logs &lt;scan-id&gt;</code> to inspect a scan.</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+              The macOS/Linux setup script prints a WSL warning when it detects WSL, or when <code>node</code>, <code>npm</code>, <code>codex</code> or <code>codex-security</code> resolve to Windows copies under <code>/mnt/&lt;drive&gt;/</code>; it only warns and does not change behavior. A real scan sends repository content to the ICA endpoint, so confirm that is allowed first, and a <code>--dry-run</code> is not proof that a scan completes. If you forgot the WSL password, run <code>wsl -d Ubuntu -u root</code> from Windows, then <code>passwd &lt;user&gt;</code>.
+            </p>
+          </div>
+        </div>
+
 
         <!-- Issue 0: UTF-8 BOM Error -->
         <div class="faq-item open">

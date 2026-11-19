@@ -228,6 +228,44 @@ else
     echo -e " [INFO] Codex Security (@openai/codex-security) is not installed (optional scanner)."
 fi
 
+# WSL detection (informational only - never changes behavior).
+# Inside WSL, Windows interop puts Windows directories on PATH, so `command -v`
+# can resolve node/npm/codex to Windows copies under /mnt/<drive>/.
+is_wsl() {
+    [ -n "${WSL_DISTRO_NAME:-}" ] && return 0
+    [ -n "${WSL_INTEROP:-}" ] && return 0
+    grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null && return 0
+    return 1
+}
+
+IS_WSL=false
+WSL_WINDOWS_TOOLS=()
+if is_wsl; then
+    IS_WSL=true
+    for tool in node npm codex codex-security; do
+        tool_path="$(command -v "$tool" 2>/dev/null || true)"
+        case "$tool_path" in
+            /mnt/[a-zA-Z]/*|*.exe) WSL_WINDOWS_TOOLS+=("$tool=$tool_path") ;;
+        esac
+    done
+    echo -e " ${CYAN}[INFO]${NC} WSL detected${WSL_DISTRO_NAME:+ ($WSL_DISTRO_NAME)}."
+    if [ ${#WSL_WINDOWS_TOOLS[@]} -gt 0 ]; then
+        echo -e " ${YELLOW}[WARN]${NC} These tools resolve to Windows copies under /mnt/<drive>/, not Linux-native installs:"
+        for entry in "${WSL_WINDOWS_TOOLS[@]}"; do
+            echo -e "        - ${entry%%=*} -> ${entry#*=}"
+        done
+        echo -e " ${YELLOW}[WARN]${NC} Windows tools run from WSL can install packages into Windows paths, start the Windows"
+        echo -e "        sandbox (which fails when the desktop app owns it) or fail with path/permission errors."
+        echo -e "        Recommended: install Linux-native tools (e.g. 'sudo apt update && sudo apt install -y nodejs npm'),"
+        echo -e "        use Node.js ^22.13 || ^24 || ^26, and confirm 'command -v node npm' shows /usr/bin/... paths."
+        echo -e "        Note: this script still treats these Windows copies as installed. See README: 'Scanning from WSL'."
+    else
+        echo -e " ${GREEN}[OK]${NC} No Windows copies of node/npm/codex/codex-security found on PATH."
+    fi
+fi
+
+
+
 # Missing prerequisites installable via Homebrew.
 # VS Code is intentionally excluded: IBM-managed machines must install it via Mac@IBM.
 MISSING_BREW=()

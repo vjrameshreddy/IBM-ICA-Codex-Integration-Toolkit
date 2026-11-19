@@ -14,9 +14,13 @@ All notable changes, architectural updates, security assessments, and configurat
 - **`CODEX_SECURITY_PROJECT_CONFIG`** selects that file: set as a User environment variable on Windows, and written to `~/.codex/.env` (backed up, `chmod 600`) on macOS/Linux. If it already points elsewhere, the conflict is shown and you are asked; it is never replaced silently (default: keep).
 - **`codex-security-ica.ps1`** reuses the project config via the new `-ConfigPath` parameter, keeps `-Path` validation and `-DryRun`, and states that auth selection does not guarantee sandbox startup or scan completion.
 - `index.html`: version badge `v2.3.0`, Step 1.1 `gh --version` verification, Step 1.2 download table row, and TAB 6 automated uninstallation / fresh reinstall FAQ.
+- **WSL detection in `setup-codex-ica.sh`** (bash only, there is no Windows equivalent): detects WSL (`WSL_DISTRO_NAME`, `WSL_INTEROP` or `/proc/sys/kernel/osrelease`) and warns when `node`, `npm`, `codex` or `codex-security` resolve to Windows copies under `/mnt/<drive>/` (or `.exe`). It only warns; prerequisite checks and installs behave as before. Recommends Linux-native Node.js/npm.
+- **"Scanning from WSL" documentation** in `README.md` and the `index.html` Troubleshooting tab: prerequisites, commands, result locations and caveats.
 
 ### ⚠️ Known Limitations
-- Selecting ICA for `codex-security` only fixes authentication. A scan can still fail at the Windows sandbox setup stage (`failed to prepare Windows sandbox`); this is a separate, unresolved problem.
+- Selecting ICA for `codex-security` only fixes authentication. On native Windows a scan can still fail at the Windows sandbox setup stage (`failed to prepare Windows sandbox`). Likely cause: the Codex/ChatGPT desktop app owns the machine-wide sandbox service and accounts. The toolkit does not change this.
+- Workaround: a scan completed through ICA from WSL2 (Ubuntu 26.04, Node.js v22.22.1, codex-security 0.10.1). Single machine, not verified elsewhere.
+- In WSL the setup script still counts Windows copies of node/npm as installed (warning only); install Linux-native Node.js/npm first.
 - A `-DryRun` of the wrapper previews the selected method only and is not a completed scan.
 
 ---

@@ -212,7 +212,7 @@ Apply restricted owner-only permissions:
 - Write `~/.codex/codex-security.yaml` (UTF-8 without BOM, **no credentials**; `auth: api-key` and `env_key: ICA_API_KEY`). Existing files follow the usual backup / overwrite / skip prompts.
 - Select it through `CODEX_SECURITY_PROJECT_CONFIG` (User environment variable on Windows, `~/.codex/.env` on macOS/Linux). If the variable already points to another file, the conflict is shown and you are asked; it is never replaced silently.
 
-The YAML schema was tested against **codex-security v0.10.0** only. A completed real scan has not been verified from the CLI on the test machine.
+The YAML schema was tested against **codex-security v0.10.0** only. A completed real scan has not been verified on native Windows on the test machine; it did complete from WSL (see [Scanning from WSL](#scanning-from-wsl-workaround-for-the-windows-sandbox-failure)).
 
 ### Usage
 
@@ -242,7 +242,66 @@ failed to prepare Windows sandbox ... orchestrator_helper_exit_nonzero: setup he
 ```
 
 - `-DryRun` is unaffected, and a plain `codex exec` through ICA works.
-- A scan completing end-to-end through ICA was **not verified**. The sandbox failure is a separate issue and is not addressed by this script.
+- A scan completing end-to-end through ICA was **not verified on native Windows**. The sandbox failure is a separate issue and is not addressed by this script.
+- Likely cause: the Codex/ChatGPT desktop app owns the machine-wide Windows sandbox service and accounts, so the scanner's own sandbox setup is refused. Nothing in this toolkit changes that. The WSL route below avoids the Windows sandbox entirely.
+
+### Scanning from WSL (workaround for the Windows sandbox failure)
+
+A full scan completed through ICA from WSL2 on the test machine (WSL2 Ubuntu 26.04, Node.js v22.22.1, `@openai/codex-security` 0.10.1). This is a single scan on one machine and is not verified elsewhere.
+
+**Prerequisites**
+
+- WSL2 with a Linux distribution (e.g. Ubuntu) and a Linux user with `sudo`.
+- **Linux-native** Node.js `^22.13 || ^24 || ^26` and npm. Windows copies reached through `/mnt/c/...` do not count. Check that `command -v node npm` prints `/usr/bin/...` paths.
+- Your `ICA_API_KEY` (the setup script prompts for it and stores it in `~/.codex/.env`, mode 600).
+- The repository to scan, cloned onto the Linux filesystem (`~/...`), not `/mnt/c/...`. A clone contains committed files only.
+
+**Steps (inside the WSL shell)**
+
+```bash
+# 1. Linux-native Node.js and npm
+sudo apt update && sudo apt install -y nodejs npm
+command -v node npm            # must be /usr/bin/node and /usr/bin/npm
+node --version                 # must satisfy ^22.13 || ^24 || ^26
+
+# 2. Get the toolkit and run the setup (dry-run first)
+git clone https://github.com/vjrameshreddy/IBM-ICA-Codex-Integration-Toolkit.git ~/ica-toolkit
+cd ~/ica-toolkit
+bash ./setup-codex-ica.sh --dry-run
+bash ./setup-codex-ica.sh      # answer Yes to the optional @openai/codex-security install
+
+# 3. Put the npm global bin on PATH (the script cannot persist this when there is no ~/.zshrc)
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+export PATH="$HOME/.npm-global/bin:$PATH"
+
+# 4. Clone the repository to scan onto the Linux filesystem
+git clone <repo-url> ~/my-repo
+
+# 5. Load the ICA key and scan
+set -a; . ~/.codex/.env; set +a
+codex-security scan ~/my-repo --dry-run   # preview only, sends nothing
+codex-security scan ~/my-repo             # real scan: sends repository content to ICA
+```
+
+The setup script prints a **WSL warning** when it detects WSL, or when `node`, `npm`, `codex` or `codex-security` resolve to Windows copies under `/mnt/<drive>/`. It only warns; it does not change its behavior. The scanner bundles its own Codex runtime, so a separate native `codex` is not required for scans.
+
+**Where results are**
+
+```
+~/.codex/state/plugins/codex-security/scans/<repo-name>/<scan-folder>/
+    report.md  threatmodel.md  findings.json  scan-manifest.json
+```
+
+```bash
+codex-security scans show <scan-id>
+codex-security scans logs <scan-id>
+```
+
+**Caveats**
+
+- A real scan sends repository content to the ICA endpoint; confirm that is allowed first. A `--dry-run` is not proof that a scan completes.
+- If a WSL password is forgotten, reset it from Windows: `wsl -d Ubuntu -u root`, then `passwd <user>`.
+- Plain `codex` inside WSL may still resolve to the Windows copy; install a Linux-native one only if you need it.
 
 ---
 
